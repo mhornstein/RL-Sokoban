@@ -1,5 +1,6 @@
 import gym
 import matplotlib.pyplot as plt
+import random
 
 class EnvWrapper(gym.Env):
     '''
@@ -47,6 +48,15 @@ class EnvWrapper(gym.Env):
 
     def sample_action(self):
         return self.env.action_space.sample()
+
+    def observation_space(self):
+        return self.env.observation_space
+
+    def get_states_dim(self):
+        return self.env.observation_space.shape
+
+    def action_space(self):
+        return self.env.action_space
 
 # for testing
 if __name__ == '__main__': # TODO finish here
