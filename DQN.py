@@ -102,16 +102,15 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         episodes_steps.append(steps_count)
         episodes_rewards.append(reward_sum)
 
-        # Last - create a policy and return it along with all other measurements
-        def policy(state):
-            '''
-            This function gets a state and returns the preferable action.
-            It does it by providing the state to the network and returning the action with maximal q-value
-            (i.e. this is a greedy policy)
-            '''
-            state = np.reshape(state, (1, action_value_net.state_shape[0]))
-            q_values = action_value_net.network.predict(state, verbose=0)
-            action = np.argmax(q_values)
-            return action
+    # Last - create a policy and return it along with all other measurements
+    def policy(s):
+        '''
+        This function gets a state and returns the preferable action.
+        It does it by providing the state to the network and returning the action with maximal q-value
+        (i.e. this is a greedy policy)
+        '''
+        q_values = action_value_net.predict(np.reshape(s, (1, -1)), verbose=0)
+        action = np.argmax(q_values)
+        return action
 
-        return policy, done_count, episodes_steps, episodes_rewards
+    return policy, done_count, episodes_steps, episodes_rewards

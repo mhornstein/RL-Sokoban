@@ -1,10 +1,10 @@
 import os
 import numpy as np
-
 from DQN import dqn
 from EnvWrapper import EnvWrapper
 from constants import *
 from experiment_config import tested_parameters, num_boxes
+from reports_util import log_training_process
 from soko_pap import PushAndPullSokobanEnv
 
 def init_results_files(tested_parameter, result_path):
@@ -24,11 +24,45 @@ def init_results_files(tested_parameter, result_path):
 
     return train_result_file, test_result_file
 
+def evaluate_policy(env, policy, num_episodes, steps_cutoff):
+    '''
+    Tests the given policy on the given env episode_count times.
+    :return: statistics of the conducted test: successful_finish_count, unsuccessful_finish_count, successful_finish_steps_avg, total_steps_avg
+    '''
+    successful_finish_count = 0
+    successful_finish_steps = []
+    unsuccessful_finish_count = 0
+    total_steps = []
+
+    for ep in range(1, num_episodes + 1):
+        # print(f'start ep: {ep}. ', end='')
+        state = env.reset()
+        done = False
+        for t in range(1, steps_cutoff + 1):
+            env.render()
+            action = policy(state)
+            state, reward, done, info = env.step(action)
+            if done:
+                # print(f'episode finished successfully after {t} timesteps')
+                successful_finish_count += 1
+                successful_finish_steps.append(t)
+                break
+        if not done:
+            # print(f'episode finished due to timeout')
+            unsuccessful_finish_count += 1
+
+        total_steps.append(t)
+
+    successful_finish_steps_avg = 0 if len(successful_finish_steps) == 0 else np.mean(successful_finish_steps)
+    total_steps_avg = np.mean(total_steps)
+
+    return successful_finish_count, unsuccessful_finish_count, successful_finish_steps_avg, total_steps_avg
+
 def run_experiment(env_params, algorithm_params, tested_parameter, tested_values, num_of_experiments_per_value):
     algorithm_params_cpy = algorithm_params.copy()
     env_params_cpy = env_params.copy()
 
-    env_params_cpy['sok'] = PushAndPullSokobanEnv(dim_room=(7, 7), num_boxes=1, max_steps=500) # todo UPDATE
+    env_params_cpy['sok'] = PushAndPullSokobanEnv(dim_room=(7, 7), num_boxes=1, max_steps=10000) # todo UPDATE
 
     result_path = f'./results_{tested_parameter}'
     train_result_file, test_result_file = init_results_files(tested_parameter, result_path)
@@ -63,29 +97,24 @@ def run_experiment(env_params, algorithm_params, tested_parameter, tested_values
 
             # First - log training process
             experiment_log_path = f'{parameter_train_log_path}/{experiment}'
-            # TODO
-            # log_training_process(experiment_log_path, start_states_count, states_visits_mean, episodes_steps, episodes_rewards)
+            log_training_process(experiment_log_path, episodes_steps, episodes_rewards)
 
             # Then - log training results
-            '''
             f = open(train_result_file, 'a')
             total_steps_avg = np.mean(episodes_steps)
             rewards_avg = np.mean(episodes_rewards)
             f.write(f'{parameter_value},{experiment},{done_count},{algorithm_params_cpy["num_episodes"]},{total_steps_avg},{rewards_avg}\n')
             f.close()
-            '''
 
             ################
             # Step 2: Test #
             ################
-            '''
             print('Start testing')
             done_episodes_count, undone_episodes_count, done_episodes_avg_steps, total_steps_avg = evaluate_policy(env, policy, num_episodes=test_num_episodes, steps_cutoff=test_steps_cutoff)
 
             f = open(test_result_file, 'a')
             f.write(f'{parameter_value},{experiment},{done_episodes_count},{undone_episodes_count},{done_episodes_avg_steps},{total_steps_avg}\n')
             f.close()
-            '''
     # create_report(result_path, tested_parameter, train_result_file, test_result_file)
 
 if __name__ == '__main__':
