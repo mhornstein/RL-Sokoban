@@ -1,6 +1,7 @@
 import gym
 import matplotlib.pyplot as plt
 import random
+import numpy as np
 
 class EnvWrapper(gym.Env):
     '''
@@ -37,23 +38,28 @@ class EnvWrapper(gym.Env):
         chosen_action = random.choices(self.action_list, dist)[0]
 
         state, reward, done, info = self.env.step(chosen_action)
+        state = self.get_current_state()
 
         return state, reward, done, info
 
     def reset(self):
-        return self.env.reset()
+        self.env.reset()
+        return self.get_current_state()
 
-    def render(self, mode='rgb_array'):
+    def get_current_state(self): # Returns a simplified version of the state.
+        rgb_display = self.env.render(mode='tiny_rgb_array')
+        grayscale_display = np.dot(rgb_display[..., :3], [0.2989, 0.5870, 0.1140]) # refernece: https://stackoverflow.com/questions/12201577/how-can-i-convert-an-rgb-image-into-grayscale-in-python
+        return grayscale_display
+
+    def render(self, mode='tiny_rgb_array'):
         plt.imshow(self.env.render(mode))
 
     def sample_action(self):
         return self.env.action_space.sample()
 
-    def observation_space(self):
-        return self.env.observation_space
-
     def get_states_dim(self):
-        return self.env.observation_space.shape
+        current_state = self.get_current_state()
+        return current_state.shape
 
     def action_space(self):
         return self.env.action_space

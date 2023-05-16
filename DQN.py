@@ -2,7 +2,7 @@ import numpy as np
 import random
 from collections import deque
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten
 from keras.optimizers import Adam
 
 def build_dqn(input_shape, output_shape, learning_rate=0.001):
@@ -10,11 +10,17 @@ def build_dqn(input_shape, output_shape, learning_rate=0.001):
     Creates and return a dqn network with the given input and output shapes, and learning-rate
     '''
     model = Sequential()
-    model.add(Dense(64, activation='relu', input_shape=input_shape))
+    model.add(Conv2D(5, (3, 3), activation='relu', input_shape=np.append(input_shape, 1)))
+    model.add(MaxPooling2D((1, 1)))
+    model.add(Conv2D(10, (3, 3), activation='relu'))
+    model.add(MaxPooling2D((1, 1)))
+    model.add(Conv2D(10, (3, 3), activation='relu'))
+    model.add(Flatten())
     model.add(Dense(64, activation='relu'))
     model.add(Dense(output_shape, activation='linear'))
     model.compile(loss='mse', optimizer=Adam(learning_rate=learning_rate))
     return model
+
 
 def train_action_value_network(action_value_net, target_net, batch, gamma):
     states = []
@@ -24,13 +30,13 @@ def train_action_value_network(action_value_net, target_net, batch, gamma):
         if done:
             target = r
         else:
-            target = r + gamma * np.amax(target_net.predict(s_tag, verbose = 0))
+            target = r + gamma * np.amax(target_net.predict(np.array([s_tag,]), verbose = 0)[0])
 
-        target_q_values = action_value_net.predict(s, verbose = 0)[0]
+        target_q_values = action_value_net.predict(np.array([s,]), verbose = 0)[0] # https://datascience.stackexchange.com/questions/13461/how-can-i-get-prediction-for-only-one-instance-in-keras
         target_q_values[a] = target
 
-        states.append(s.T)
-        targets.append(np.expand_dims(target_q_values, axis=0).T)
+        states.append(s)
+        targets.append(np.expand_dims(target_q_values, axis=0))
 
     action_value_net.fit(np.array(states), np.array(targets), epochs=1, verbose=0)
 
@@ -46,17 +52,17 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
 
     # create both agent and target nets
     states_dim = env.get_states_dim()
-    network_input_shape = (np.prod(states_dim),)
     actions_dim = env.action_space().n
-    network_output_shape = actions_dim
-    action_value_net = build_dqn(network_input_shape, network_output_shape, learning_rate)
-    target_net = build_dqn(network_input_shape, network_output_shape, learning_rate)
+
+    action_value_net = build_dqn(states_dim, actions_dim, learning_rate)
+    target_net = build_dqn(states_dim, actions_dim, learning_rate)
     target_net.set_weights(action_value_net.get_weights())
 
     # Start running episodes
     for ep in range(1, num_episodes+1):
         print(f'running ep: {ep}. Steps: ', end ='')
         s = env.reset()
+        env.render()
 
         done = False
         steps_count = 0
@@ -75,11 +81,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
             s_tag, r, done, info = env.step(a)
 
             # Step 3: save the result of the step in memory
-            memory_buffer.append((np.reshape(s, (1, -1)),
-                                  a,
-                                  r,
-                                  np.reshape(s_tag, (1, -1)),
-                                  done))
+            memory_buffer.append((s, a, r, s_tag, done))
 
             # Step 4: train the agent network
             if len(memory_buffer) > batch_size:
@@ -91,6 +93,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
                 target_net.set_weights(action_value_net.get_weights())
 
             # Step 6: update to the new state
+            env.render()
             s = s_tag
             reward_sum += r
             steps_count += 1
@@ -109,7 +112,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         It does it by providing the state to the network and returning the action with maximal q-value
         (i.e. this is a greedy policy)
         '''
-        q_values = action_value_net.predict(np.reshape(s, (1, -1)), verbose=0)
+        q_values = action_value_net.predict(np.array([s,]), verbose=0)
         action = np.argmax(q_values)
         return action
 
