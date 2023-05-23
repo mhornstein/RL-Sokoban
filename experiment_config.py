@@ -39,7 +39,7 @@ env_params = {'compliance': 1, 'num_boxes': 1}
 algorithm_params = {'learning_rate': 0.9, 'gamma': 0.99, 'epsilon': 1.0, 'ep_decay': 0.99,
                     'num_episodes': train_num_episodes, 'steps_cutoff': train_steps_cutoff,
                     'batch_size': batch_size, 'target_freq_update': 8, 'memory_buffer_size':1000,
-                    'fixed_board': False}
+                    'layers_sizes': [16, 32], 'fixed_board': False}
 
 
 num_boxes = 1
