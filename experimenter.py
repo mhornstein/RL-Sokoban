@@ -2,8 +2,7 @@ import os
 import numpy as np
 from DQN import dqn
 from EnvWrapper import EnvWrapper
-from constants import *
-from experiment_config import tested_parameters, num_boxes
+from experiment_config import *
 from reports_util import log_training_process
 from soko_pap import PushAndPullSokobanEnv
 
