@@ -8,13 +8,14 @@ from keras.optimizers import Adam
 
 from EnvWrapper import EnvWrapper
 
-def build_dqn(input_shape, output_shape, learning_rate=0.001):
+def build_dqn(input_shape, output_shape, learning_rate, layers_sizes):
     '''
     Creates and return a dqn network with the given input and output shapes, and learning-rate
     '''
     model = Sequential()
     model.add(Flatten(input_shape=input_shape))
-    model.add(Dense(32, activation='relu'))
+    for layer_size in layers_sizes:
+        model.add(Dense(layer_size, activation='relu'))
     model.add(Dense(output_shape, activation='linear'))
     model.compile(loss='mse', optimizer=Adam(learning_rate=learning_rate))
     return model
@@ -39,7 +40,8 @@ def train_action_value_network(action_value_net, target_net, batch, gamma):
     action_value_net.fit(np.array(states), np.array(targets), epochs=1, verbose=1)
 
 def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
-        target_freq_update, memory_buffer_size, learning_rate, steps_cutoff, fixed_board):
+        target_freq_update, memory_buffer_size, learning_rate, steps_cutoff, fixed_board,
+        layers_sizes):
 
     done_count = 0
     episodes_steps = []
@@ -52,8 +54,8 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
     states_dim = env.get_states_dim()
     actions_dim = env.action_space().n
 
-    action_value_net = build_dqn(states_dim, actions_dim, learning_rate)
-    target_net = build_dqn(states_dim, actions_dim, learning_rate)
+    action_value_net = build_dqn(states_dim, actions_dim, learning_rate, layers_sizes)
+    target_net = build_dqn(states_dim, actions_dim, learning_rate, layers_sizes)
     target_net.set_weights(action_value_net.get_weights())
 
     # Start running episodes
