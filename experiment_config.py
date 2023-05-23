@@ -41,9 +41,11 @@ algorithm_params = {'learning_rate': 0.9, 'gamma': 0.99, 'epsilon': 1.0, 'ep_dec
                     'batch_size': batch_size, 'target_freq_update': 8, 'memory_buffer_size':1000,
                     'layers_sizes': [16, 32], 'fixed_board': False}
 
-
-num_boxes = 1
-
-tested_parameters = {'compliance': [1, 0.9]}
-
-
+#######################################
+# Tested hyperparameter configuration #
+#######################################
+'''
+remove dictionary keys to test less hyperparameters
+Change the values in the entries to test different hyper-parameters values
+'''
+tested_parameters = {'layers_sizes': [[16,32], [16,16]], 'fixed_board': [True, False], 'compliance': [1, 0.9]}

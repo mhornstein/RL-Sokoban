@@ -3,7 +3,16 @@ import numpy as np
 from DQN import dqn
 from EnvWrapper import EnvWrapper
 from experiment_config import *
-from reports_util import log_training_process
+from reports_util import log_training_process, create_report
+
+
+def escape(value):
+    '''
+    Escapes the given string so it can be written to a csv
+    '''
+    es_value = str(value)
+    es_value = es_value.replace(',','')
+    return es_value
 
 def init_results_files(tested_parameter, result_path):
     if not os.path.exists(result_path):
@@ -71,6 +80,7 @@ def run_experiment(env_params, algorithm_params, tested_parameter, tested_values
 
     # Running test for parameter_value
     for parameter_value in tested_values:
+        esc_parameter_value = escape(parameter_value)
 
         if tested_parameter in env_params_cpy:
             env_params_cpy[tested_parameter] = parameter_value
@@ -81,7 +91,7 @@ def run_experiment(env_params, algorithm_params, tested_parameter, tested_values
         algorithm_params_cpy['env'] = env
 
         print(f'running experiment: Algo params: {algorithm_params_cpy}, Env params: {env_params_cpy}')
-        parameter_train_log_path = f'{train_log_path}/{tested_parameter}_{parameter_value}'  # Create training log path
+        parameter_train_log_path = f'{train_log_path}/{tested_parameter}_{esc_parameter_value}'  # Create training log path
         if not os.path.exists(parameter_train_log_path):
             os.makedirs(parameter_train_log_path)
 
@@ -100,7 +110,7 @@ def run_experiment(env_params, algorithm_params, tested_parameter, tested_values
             f = open(train_result_file, 'a')
             total_steps_avg = np.mean(episodes_steps)
             rewards_avg = np.mean(episodes_rewards)
-            f.write(f'{parameter_value},{experiment},{done_count},{algorithm_params_cpy["num_episodes"]},{total_steps_avg},{rewards_avg}\n')
+            f.write(f'{esc_parameter_value},{experiment},{done_count},{algorithm_params_cpy["num_episodes"]},{total_steps_avg},{rewards_avg}\n')
             f.close()
 
             ################
@@ -110,9 +120,9 @@ def run_experiment(env_params, algorithm_params, tested_parameter, tested_values
             done_episodes_count, undone_episodes_count, done_episodes_avg_steps, total_steps_avg = evaluate_policy(env, policy, fix_board=algorithm_params_cpy['fixed_board'], num_episodes=test_num_episodes, steps_cutoff=test_steps_cutoff)
 
             f = open(test_result_file, 'a')
-            f.write(f'{parameter_value},{experiment},{done_episodes_count},{undone_episodes_count},{done_episodes_avg_steps},{total_steps_avg}\n')
+            f.write(f'{esc_parameter_value},{experiment},{done_episodes_count},{undone_episodes_count},{done_episodes_avg_steps},{total_steps_avg}\n')
             f.close()
-    # create_report(result_path, tested_parameter, train_result_file, test_result_file)
+        create_report(result_path, tested_parameter, train_result_file, test_result_file)
 
 if __name__ == '__main__':
     for tested_parameter, tested_values in tested_parameters.items():
