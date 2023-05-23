@@ -31,7 +31,7 @@ class EnvWrapper(gym.Env):
             dist[action] = compliance
             self.action_dist[action] = dist
 
-        self.render()
+        # self.render()
 
     def step(self, action):
         dist = self.action_dist[action]

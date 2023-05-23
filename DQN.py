@@ -1,22 +1,19 @@
 import numpy as np
 import random
 from collections import deque
+
 from keras.models import Sequential
-from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten
+from keras.layers import Dense, Flatten
 from keras.optimizers import Adam
+
 
 def build_dqn(input_shape, output_shape, learning_rate=0.001):
     '''
     Creates and return a dqn network with the given input and output shapes, and learning-rate
     '''
     model = Sequential()
-    model.add(Conv2D(5, (3, 3), activation='relu', input_shape=np.append(input_shape, 1)))
-    model.add(MaxPooling2D((1, 1)))
-    model.add(Conv2D(10, (3, 3), activation='relu'))
-    model.add(MaxPooling2D((1, 1)))
-    model.add(Conv2D(10, (3, 3), activation='relu'))
-    model.add(Flatten())
-    model.add(Dense(64, activation='relu'))
+    model.add(Flatten(input_shape=input_shape))
+    model.add(Dense(32, activation='relu'))
     model.add(Dense(output_shape, activation='linear'))
     model.compile(loss='mse', optimizer=Adam(learning_rate=learning_rate))
     return model
@@ -38,7 +35,7 @@ def train_action_value_network(action_value_net, target_net, batch, gamma):
         states.append(s)
         targets.append(np.expand_dims(target_q_values, axis=0))
 
-    action_value_net.fit(np.array(states), np.array(targets), epochs=1, verbose=0)
+    action_value_net.fit(np.array(states), np.array(targets), epochs=1, verbose=1)
 
 def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         target_freq_update, memory_buffer_size, learning_rate, steps_cutoff):
@@ -93,7 +90,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
                 target_net.set_weights(action_value_net.get_weights())
 
             # Step 6: update to the new state
-            env.render()
+            # env.render()
             s = s_tag
             reward_sum += r
             steps_count += 1
