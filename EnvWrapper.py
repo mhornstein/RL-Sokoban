@@ -2,6 +2,7 @@ import gym
 import matplotlib.pyplot as plt
 import random
 import numpy as np
+from soko_pap import PushAndPullSokobanEnv
 
 class EnvWrapper(gym.Env):
     '''
@@ -14,12 +15,14 @@ class EnvWrapper(gym.Env):
     but makes use of the Sokoban env instead.
     '''
 
-    def __init__(self, sok, compliance=0.9):
+    def __init__(self, num_boxes=1, compliance=0.9):
         '''
-        :param sok: Sokoban warehouse env
+        :param num_boxes: number of boxes in the sokoban env
         :param compliance: when the agent takes a certain action, this is the probability that the environment will
         '''
-        self.env = sok
+        self.num_boxes = num_boxes
+
+        self.env = PushAndPullSokobanEnv(dim_room=(7, 7), num_boxes=num_boxes, max_steps=10000) # todo UPDATE
 
         # creating stochactic transition mapping
         n = self.env.action_space.n
@@ -46,6 +49,11 @@ class EnvWrapper(gym.Env):
         self.env.reset()
         return self.get_current_state()
 
+    def change_board(self):
+        self.env.close()
+        self.env = PushAndPullSokobanEnv(dim_room=(7, 7), num_boxes=self.num_boxes, max_steps=10000)  # todo UPDATE
+        self.reset()
+
     def get_current_state(self): # Returns a simplified version of the state.
         rgb_display = self.env.render(mode='tiny_rgb_array')
         grayscale_display = np.dot(rgb_display[..., :3], [0.2989, 0.5870, 0.1140]) # refernece: https://stackoverflow.com/questions/12201577/how-can-i-convert-an-rgb-image-into-grayscale-in-python
@@ -71,10 +79,10 @@ if __name__ == '__main__': # TODO finish here
 
     random.seed(2)
 
-    sok = PushAndPullSokobanEnv(dim_room=(7, 7), num_boxes=1, max_steps=500)
-    env = EnvWrapper(sok, 1)
+    env = EnvWrapper(num_boxes=2, compliance=1)
+    env.render()
 
-    action = 5 # Move up
+    action = 8 # Move right
     state, reward, done, info = env.step(action)
     # print(state, reward, done, info)
     env.render()

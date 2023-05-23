@@ -6,6 +6,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Flatten
 from keras.optimizers import Adam
 
+from EnvWrapper import EnvWrapper
 
 def build_dqn(input_shape, output_shape, learning_rate=0.001):
     '''
@@ -38,7 +39,7 @@ def train_action_value_network(action_value_net, target_net, batch, gamma):
     action_value_net.fit(np.array(states), np.array(targets), epochs=1, verbose=1)
 
 def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
-        target_freq_update, memory_buffer_size, learning_rate, steps_cutoff):
+        target_freq_update, memory_buffer_size, learning_rate, steps_cutoff, fixed_board):
 
     done_count = 0
     episodes_steps = []
@@ -58,6 +59,8 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
     # Start running episodes
     for ep in range(1, num_episodes+1):
         print(f'running ep: {ep}. Steps: ', end ='')
+        if not fixed_board:
+            env.change_board()
         s = env.reset()
         env.render()
 

@@ -4,7 +4,6 @@ from DQN import dqn
 from EnvWrapper import EnvWrapper
 from experiment_config import *
 from reports_util import log_training_process
-from soko_pap import PushAndPullSokobanEnv
 
 def init_results_files(tested_parameter, result_path):
     if not os.path.exists(result_path):
@@ -61,8 +60,6 @@ def run_experiment(env_params, algorithm_params, tested_parameter, tested_values
     algorithm_params_cpy = algorithm_params.copy()
     env_params_cpy = env_params.copy()
 
-    env_params_cpy['sok'] = PushAndPullSokobanEnv(dim_room=(7, 7), num_boxes=1, max_steps=10000) # todo UPDATE
-
     result_path = f'./results_{tested_parameter}'
     train_result_file, test_result_file = init_results_files(tested_parameter, result_path)
 
@@ -87,7 +84,6 @@ def run_experiment(env_params, algorithm_params, tested_parameter, tested_values
             os.makedirs(parameter_train_log_path)
 
         for experiment in range(1, num_of_experiments_per_value + 1):
-            #print(f'Evaluating parameter: {tested_parameter}={parameter_value}. Algo: {algorithm_name}. Experiment number: {experiment}.')
             #################
             # Step 1: Train #
             #################

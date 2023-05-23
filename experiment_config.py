@@ -5,7 +5,7 @@ random.seed(2)
 # Experiments configuration #
 #############################
 
-DEBUG = False
+DEBUG = True
 
 '''
 This is the number of time a given hyper-parameter value will be evaluated (i.e. "sample size").
@@ -35,10 +35,11 @@ Default hyper-parameters values (the tested hyperparameter will override its val
 
 batch_size = 2 if DEBUG else 32
 
-env_params = {'compliance': 1}
+env_params = {'compliance': 1, 'num_boxes': 1}
 algorithm_params = {'learning_rate': 0.9, 'gamma': 0.99, 'epsilon': 1.0, 'ep_decay': 0.99,
                     'num_episodes': train_num_episodes, 'steps_cutoff': train_steps_cutoff,
-                    'batch_size': batch_size, 'target_freq_update': 8, 'memory_buffer_size':1000}
+                    'batch_size': batch_size, 'target_freq_update': 8, 'memory_buffer_size':1000,
+                    'fixed_board': False}
 
 
 num_boxes = 1
