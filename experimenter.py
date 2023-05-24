@@ -4,7 +4,7 @@ from DQN import dqn
 from EnvWrapper import EnvWrapper
 from experiment_config import *
 from reports_util import log_training_process, create_report
-
+import time
 
 def escape(value):
     '''
@@ -125,6 +125,12 @@ def run_experiment(env_params, algorithm_params, tested_parameter, tested_values
         create_report(result_path, tested_parameter, train_result_file, test_result_file)
 
 if __name__ == '__main__':
+    start_time = time.time()
+
     for tested_parameter, tested_values in tested_parameters.items():
         print(f'Testing: {tested_parameter}. values: {tested_values}')
         run_experiment(env_params, algorithm_params, tested_parameter, tested_values, num_of_experiments_per_value)
+
+    end_time = time.time()
+    execution_time = end_time - start_time
+    print(f'Total time to run: {execution_time} seconds.')
