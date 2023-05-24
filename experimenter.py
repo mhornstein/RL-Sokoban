@@ -80,6 +80,9 @@ def run_experiment(env_params, algorithm_params, tested_parameter, tested_values
 
     # Running test for parameter_value
     for parameter_value in tested_values:
+        print(f'testing param: {tested_parameter}={parameter_value}')
+        start_time = time.time()
+
         esc_parameter_value = escape(parameter_value)
 
         if tested_parameter in env_params_cpy:
@@ -123,6 +126,10 @@ def run_experiment(env_params, algorithm_params, tested_parameter, tested_values
             f.write(f'{esc_parameter_value},{experiment},{done_episodes_count},{undone_episodes_count},{done_episodes_avg_steps},{total_steps_avg}\n')
             f.close()
         create_report(result_path, tested_parameter, train_result_file, test_result_file)
+
+        end_time = time.time()
+        execution_time = end_time - start_time
+        print(f'Time to run: {execution_time} seconds.\n')
 
 if __name__ == '__main__':
     start_time = time.time()

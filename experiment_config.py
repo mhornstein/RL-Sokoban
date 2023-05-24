@@ -5,13 +5,13 @@ random.seed(2)
 # Experiments configuration #
 #############################
 
-DEBUG = True
+DEBUG = False
 
 '''
 This is the number of time a given hyper-parameter value will be evaluated (i.e. "sample size").
 At the end, the mean of the resulting metrices will be calculated and presented.
 '''
-num_of_experiments_per_value = 2 if DEBUG else 10
+num_of_experiments_per_value = 1
 
 '''
 Training-phase parameters:
@@ -19,7 +19,7 @@ train_num_episodes - the number of episodes for the training
 train_steps_cutoff - maximal steps allowed per episode
 '''
 train_num_episodes = 4 if DEBUG else 500
-train_steps_cutoff = 3 if DEBUG else 5000
+train_steps_cutoff = 6 if DEBUG else 500
 
 '''
 Evaluation-phase parameters
@@ -34,12 +34,13 @@ Default hyper-parameters values (the tested hyperparameter will override its val
 '''
 
 batch_size = 2 if DEBUG else 32
+train_action_value_freq_update = 2 if DEBUG else 8
 
 env_params = {'compliance': 0.9, 'num_boxes': 1}
 algorithm_params = {'learning_rate': 0.9, 'gamma': 0.99, 'epsilon': 1.0, 'ep_decay': 0.99,
                     'num_episodes': train_num_episodes, 'steps_cutoff': train_steps_cutoff,
-                    'batch_size': batch_size, 'target_freq_update': 8, 'memory_buffer_size':1000,
-                    'layers_sizes': [32], 'fixed_board': True}
+                    'batch_size': batch_size, 'target_freq_update': 16, 'memory_buffer_size':1000,
+                    'layers_sizes': [32], 'fixed_board': True, 'train_action_value_freq_update': train_action_value_freq_update}
 
 '''
 Add to the list numeric hyper-parameter that you want to force to plot as catergorical (using bar plot)
@@ -64,3 +65,5 @@ tested_parameters = {'layers_sizes': [[16], [32], [64], [16,16], [32,32], [16,32
                      'gamma': [0.8, 0.9, 0.99],
                      'ep_decay': [0.9, 0.95, 0.99],
                      }
+
+tested_parameters = {'layers_sizes': [[16], [32], [64], [16,16], [32,32], [16,32], [32, 16]]}

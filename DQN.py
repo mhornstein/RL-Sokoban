@@ -39,7 +39,7 @@ def train_action_value_network(action_value_net, target_net, batch, gamma):
 
 def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         target_freq_update, memory_buffer_size, learning_rate, steps_cutoff, fixed_board,
-        layers_sizes):
+        layers_sizes, train_action_value_freq_update):
 
     done_count = 0
     episodes_steps = []
@@ -65,7 +65,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         env.render()
 
         done = False
-        steps_count = 0
+        steps_count = 1
         reward_sum = 0
 
         while not done and steps_count < steps_cutoff:
@@ -84,7 +84,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
             memory_buffer.append((s, a, r, s_tag, done))
 
             # Step 4: train the agent network
-            if len(memory_buffer) > batch_size:
+            if len(memory_buffer) > batch_size and steps_count % train_action_value_freq_update == 0:
                 batch = random.sample(memory_buffer, batch_size)
                 train_action_value_network(action_value_net, target_net, batch, gamma)
 
