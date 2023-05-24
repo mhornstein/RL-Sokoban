@@ -99,7 +99,7 @@ def run_experiment(env_params, algorithm_params, tested_parameter, tested_values
             #################
             # Step 1: Train #
             #################
-            #print("Start training")
+            print("Start training")
             policy, done_count, episodes_steps, episodes_rewards = dqn(**algorithm_params_cpy)
 
             # First - log training process
@@ -126,4 +126,5 @@ def run_experiment(env_params, algorithm_params, tested_parameter, tested_values
 
 if __name__ == '__main__':
     for tested_parameter, tested_values in tested_parameters.items():
+        print(f'Testing: {tested_parameter} with values: {tested_values}')
         run_experiment(env_params, algorithm_params, tested_parameter, tested_values, num_of_experiments_per_value)
