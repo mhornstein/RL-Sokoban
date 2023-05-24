@@ -76,7 +76,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
             if np.random.rand() <= epsilon:
                 a = env.sample_action()
             else:
-                q_values = action_value_net.predict(s)
+                q_values = action_value_net.predict(np.array([s,]), verbose = 0)
                 a = np.argmax(q_values)
 
             # Step 2: You get a reward r. You are now in state s’
