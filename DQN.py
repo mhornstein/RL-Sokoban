@@ -6,8 +6,6 @@ from keras.models import Sequential
 from keras.layers import Dense, Flatten
 from keras.optimizers import Adam
 
-from EnvWrapper import EnvWrapper
-
 def build_dqn(input_shape, output_shape, learning_rate, layers_sizes):
     '''
     Creates and return a dqn network with the given input and output shapes, and learning-rate
