@@ -32,6 +32,11 @@ class DQN_Net(nn.Module):
 
 def train_action_value_network(action_value_net, target_net, batch, gamma, criterion, optimizer):
     states, actions, rewards, next_states, dones = batch
+
+    '''
+    In this part, we Convert all the matrices
+    Only this part was inspired by the ATARI DQN implamantation paper: https://github.com/BY571/DQN-Atari-Agents/blob/master/Agents/dqn_agent.py
+    '''
     states = torch.FloatTensor(states)
     actions = torch.LongTensor(actions).unsqueeze(1)
     rewards = torch.FloatTensor(rewards).unsqueeze(1)
