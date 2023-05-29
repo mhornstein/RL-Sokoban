@@ -66,4 +66,4 @@ tested_parameters = {'layers_sizes': [[16], [32], [64], [16,16], [32,32], [16,32
                      'ep_decay': [0.9, 0.95, 0.99],
                      }
 
-tested_parameters = {'layers_sizes': [[16], [32], [64], [16,16], [32,32], [16,32], [32, 16]]}
+tested_parameters = {'layers_sizes': [[32,32], [16,32], [32, 16], [16, 32, 16]]}

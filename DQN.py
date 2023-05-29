@@ -35,7 +35,7 @@ def train_action_value_network(action_value_net, target_net, batch, gamma):
         states.append(s)
         targets.append(np.expand_dims(target_q_values, axis=0))
 
-    action_value_net.fit(np.array(states), np.array(targets), epochs=1, verbose=1)
+    action_value_net.fit(np.array(states), np.array(targets), epochs=1, verbose=0)
 
 def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         target_freq_update, memory_buffer_size, learning_rate, steps_cutoff, fixed_board,
@@ -69,7 +69,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         reward_sum = 0
 
         while not done and steps_count < steps_cutoff:
-            print(f'{steps_count}', end= ' ')
+            print(f'{steps_count}', end= '\n')
             # Step 1: Choose an action a based on current policy (e.g. 𝜀 − 𝑔𝑟𝑒𝑒𝑑𝑦))
             if np.random.rand() <= epsilon:
                 a = env.sample_action()
