@@ -8,9 +8,9 @@ import torch.optim as optim
 
 RESULTS_FILE = 'results.csv'
 
-def write_result(episode, step, loss, accuracy, filename=RESULTS_FILE):
+def write_result(config_name ,episode, step, loss, accuracy, filename=RESULTS_FILE):
     with open(filename, 'a') as file:
-        file.write(f'{episode},{step},{loss},{accuracy}\n')
+        file.write(f'{config_name},{episode},{step},{loss},{accuracy}\n')
 
 class DQN_Net(nn.Module):
     def __init__(self, input_shape, output_shape, layers_sizes):
@@ -70,9 +70,9 @@ def train_action_value_network(action_value_net, target_net, batch, gamma, crite
 def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         target_freq_update, memory_buffer_size, learning_rate, steps_cutoff, fixed_board,
         layers_sizes, train_action_value_freq_update):
-    
+    config_name = str(layers_sizes).replace(',', ' ')
     with open(RESULTS_FILE, 'w') as file:
-        file.write(f'episode,step,loss,accuracy\n')
+        file.write(f'config,episode,step,loss,accuracy\n')
 
     done_count = 0
     episodes_steps = []
@@ -125,7 +125,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
             if len(memory_buffer) > batch_size and steps_count % train_action_value_freq_update == 0:
                 batch = zip(*random.sample(memory_buffer, batch_size))
                 loss, accuracy = train_action_value_network(action_value_net, target_net, batch, gamma, criterion, optimizer)
-                write_result(ep, steps_count, loss, accuracy)
+                write_result(config_name, ep, steps_count, loss, accuracy)
 
             # Step 5: Every target_update_freq update the target net
             if ep % target_freq_update == 0:
