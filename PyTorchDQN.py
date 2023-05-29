@@ -2,44 +2,72 @@ import numpy as np
 import random
 from collections import deque
 
-from keras.models import Sequential
-from keras.layers import Dense, Flatten
-from keras.optimizers import Adam
+import torch
+import torch.nn as nn
+import torch.optim as optim
 
-def build_dqn(input_shape, output_shape, learning_rate, layers_sizes):
+RESULTS_FILE = 'results.csv'
+
+def write_result(episode, step, loss, accuracy, filename=RESULTS_FILE):
+    with open(filename, 'a') as file:
+        file.write(f'{episode},{step},{loss},{accuracy}\n')
+
+class DQN_Net(nn.Module):
+    def __init__(self, input_shape, output_shape, layers_sizes):
+        super(DQN_Net, self).__init__()
+        input_size = input_shape[0] * input_shape[1]
+        layer_sizes = [input_size] + layers_sizes + [output_shape]
+        layers = []
+        for i in range(len(layer_sizes) - 1):
+            layers.append(nn.Linear(layer_sizes[i], layer_sizes[i+1]))
+            if i < len(layer_sizes) - 2: # Do not add relu layer after the last linear layer - this is where the softmax is
+                layers.append(nn.ReLU())
+
+        self.model = nn.Sequential(*layers)
+    
+    def forward(self, x):
+        size = x.size()
+        flattened_size = size[0], -1
+        return self.model(x.view(flattened_size))
+
+def train_action_value_network(action_value_net, target_net, batch, gamma, criterion, optimizer):
+    states, actions, rewards, next_states, dones = batch
+    states = torch.FloatTensor(states)
+    actions = torch.LongTensor(actions).unsqueeze(1)
+    rewards = torch.FloatTensor(rewards).unsqueeze(1)
+    next_states = torch.FloatTensor(next_states)
+    dones = torch.FloatTensor(dones).unsqueeze(1)
+
+    q_values = action_value_net(states).gather(1, actions)
+    next_q_values = target_net(next_states).max(1)[0].unsqueeze(1)
+
     '''
-    Creates and return a dqn network with the given input and output shapes, and learning-rate
-    '''
-    model = Sequential()
-    model.add(Flatten(input_shape=input_shape))
-    for layer_size in layers_sizes:
-        model.add(Dense(layer_size, activation='relu'))
-    model.add(Dense(output_shape, activation='linear'))
-    model.compile(loss='mse', optimizer=Adam(learning_rate=learning_rate))
-    return model
-
-
-def train_action_value_network(action_value_net, target_net, batch, gamma):
-    states = []
-    targets = []
-
-    for s, a, r, s_tag, done in batch:
-        if done:
+    This is the matrix-way to write the following for a single state:
+    if done:
             target = r
         else:
-            target = r + gamma * np.amax(target_net.predict(np.array([s_tag,]), verbose = 0)[0])
+            target = r + gamma * np.amax(target_net.predict(np.array([s_tag,]))
+    '''
+    target_q_values = rewards + (1 - dones) * gamma * next_q_values
 
-        target_q_values = action_value_net.predict(np.array([s,]), verbose = 0)[0] # https://datascience.stackexchange.com/questions/13461/how-can-i-get-prediction-for-only-one-instance-in-keras
-        target_q_values[a] = target
+    loss = criterion(q_values, target_q_values)
 
-        states.append(s)
-        targets.append(np.expand_dims(target_q_values, axis=0))
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
 
-    action_value_net.fit(np.array(states), np.array(targets), epochs=1, verbose=1)
+    # Compute accuracy and loss
+    predicted_actions = torch.argmax(q_values, dim=1)
+    accuracy = (predicted_actions == actions.squeeze()).float().mean()
+
+    return loss.item(), accuracy
 
 def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         target_freq_update, memory_buffer_size, learning_rate, steps_cutoff, fixed_board,
         layers_sizes, train_action_value_freq_update):
+    
+    with open(RESULTS_FILE, 'w') as file:
+        file.write(f'episode,step,loss,accuracy\n')
 
     done_count = 0
     episodes_steps = []
@@ -52,9 +80,12 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
     states_dim = env.get_states_dim()
     actions_dim = env.action_space().n
 
-    action_value_net = build_dqn(states_dim, actions_dim, learning_rate, layers_sizes)
-    target_net = build_dqn(states_dim, actions_dim, learning_rate, layers_sizes)
-    target_net.set_weights(action_value_net.get_weights())
+    action_value_net = DQN_Net(states_dim, actions_dim, layers_sizes)
+    target_net = DQN_Net(states_dim, actions_dim, layers_sizes)
+    target_net.load_state_dict(action_value_net.state_dict())
+
+    optimizer = optim.Adam(action_value_net.parameters(), lr=learning_rate)
+    criterion = nn.MSELoss()
 
     # Start running episodes
     for ep in range(1, num_episodes+1):
@@ -74,8 +105,10 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
             if np.random.rand() <= epsilon:
                 a = env.sample_action()
             else:
-                q_values = action_value_net.predict(np.array([s,]), verbose = 0)
-                a = np.argmax(q_values)
+                state = torch.FloatTensor(s).unsqueeze(0)
+                with torch.no_grad():
+                    q_values = action_value_net(state)
+                a = torch.argmax(q_values).item()
 
             # Step 2: You get a reward r. You are now in state s’
             s_tag, r, done, info = env.step(a)
@@ -85,12 +118,13 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
 
             # Step 4: train the agent network
             if len(memory_buffer) > batch_size and steps_count % train_action_value_freq_update == 0:
-                batch = random.sample(memory_buffer, batch_size)
-                train_action_value_network(action_value_net, target_net, batch, gamma)
+                batch = zip(*random.sample(memory_buffer, batch_size))
+                loss, accuracy = train_action_value_network(action_value_net, target_net, batch, gamma, criterion, optimizer)
+                write_result(ep, steps_count, loss, accuracy)
 
             # Step 5: Every target_update_freq update the target net
             if ep % target_freq_update == 0:
-                target_net.set_weights(action_value_net.get_weights())
+                target_net.load_state_dict(action_value_net.state_dict())
 
             # Step 6: update to the new state
             # env.render()
@@ -112,8 +146,10 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         It does it by providing the state to the network and returning the action with maximal q-value
         (i.e. this is a greedy policy)
         '''
-        q_values = action_value_net.predict(np.array([s,]), verbose=0)
-        action = np.argmax(q_values)
-        return action
+        state = torch.FloatTensor(s).unsqueeze(0)
+        with torch.no_grad():
+            q_values = action_value_net(state)
+        a = torch.argmax(q_values).item()
+        return a
 
     return policy, done_count, episodes_steps, episodes_rewards
