@@ -1,9 +1,9 @@
 import os
 import numpy as np
-from DQN import dqn
+from PyTorchDQN import dqn
 from EnvWrapper import EnvWrapper
 from experiment_config import *
-from reports_util import log_training_process, create_report
+from reports_util import log_training_process, log_net_performance, create_report
 import time
 
 def escape(value):
@@ -103,11 +103,12 @@ def run_experiment(env_params, algorithm_params, tested_parameter, tested_values
             # Step 1: Train #
             #################
             print("Start training")
-            policy, done_count, episodes_steps, episodes_rewards = dqn(**algorithm_params_cpy)
+            policy, done_count, episodes_steps, episodes_rewards, net_performance = dqn(**algorithm_params_cpy)
 
             # First - log training process
             experiment_log_path = f'{parameter_train_log_path}/{experiment}'
             log_training_process(experiment_log_path, episodes_steps, episodes_rewards)
+            log_net_performance(experiment_log_path, net_performance)
 
             # Then - log training results
             f = open(train_result_file, 'a')

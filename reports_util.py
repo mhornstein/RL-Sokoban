@@ -4,6 +4,7 @@ import os
 import pandas as pd
 from matplotlib.gridspec import GridSpec
 import seaborn as sns
+import csv
 
 from experiment_config import force_categoric_plot
 
@@ -33,6 +34,14 @@ def log_training_process(experiment_log_dir, episodes_steps, episodes_rewards):
                   title='Convergence Graph: Episodes steps', xlabel='Episode number', ylabel='Steps')
     save_lineplot(data=episodes_rewards, path=f'{experiment_log_dir}/Convergence_Graph__Episodes_reward.png',
                   title='Convergence Graph: Episodes reward', xlabel='Episode number', ylabel='Reward')
+
+def log_net_performance(experiment_log_path, net_performance):
+    with open(f'{experiment_log_path}/net_performance.csv', 'w', newline='') as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=['ep', 'steps_count', 'loss', 'accuracy'])
+        writer.writeheader()
+
+        for data_row in net_performance:
+            writer.writerow(data_row)
 
 #########################
 ## full report generation
