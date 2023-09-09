@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import random
 import numpy as np
 from soko_pap import PushAndPullSokobanEnv
+import copy
 
 class EnvWrapper(gym.Env):
     '''
@@ -22,7 +23,8 @@ class EnvWrapper(gym.Env):
         '''
         self.num_boxes = num_boxes
 
-        self.env = PushAndPullSokobanEnv(dim_room=(7, 7), num_boxes=num_boxes, max_steps=10000) # todo UPDATE
+        self.source_env = PushAndPullSokobanEnv(dim_room=(7, 7), num_boxes=num_boxes, max_steps=10000) # todo UPDATE
+        self.reset()
 
         # creating stochactic transition mapping
         n = self.env.action_space.n
@@ -34,24 +36,24 @@ class EnvWrapper(gym.Env):
             dist[action] = compliance
             self.action_dist[action] = dist
 
-        # self.render()
+        self.render()
 
     def step(self, action):
         dist = self.action_dist[action]
         chosen_action = random.choices(self.action_list, dist)[0]
 
         state, reward, done, info = self.env.step(chosen_action)
+        reward = self.calc_reward()
         state = self.get_current_state()
 
         return state, reward, done, info
 
-    def reset(self):
-        self.env.reset()
+    def reset(self): # open gym reset changes the board. override, as we do not want to change the board upon reset
+        self.env = copy.deepcopy(self.source_env)
         return self.get_current_state()
 
     def change_board(self):
-        self.env.close()
-        self.env = PushAndPullSokobanEnv(dim_room=(7, 7), num_boxes=self.num_boxes, max_steps=10000)  # todo UPDATE
+        self.source_env.reset()
         self.reset()
 
     def get_current_state(self): # Returns a simplified version of the state.
@@ -72,6 +74,13 @@ class EnvWrapper(gym.Env):
     def action_space(self):
         return self.env.action_space
 
+    def calc_reward(self):
+        room_state = self.env.room_state
+        box_x, box_y= np.where(room_state == 4)
+        target_x, target_y = np.where(room_state == 2)
+        reward = abs(box_x - target_x) + abs(box_y - target_y) # this is the manhattan distance between box and target
+        return 0 if len(reward) == 0 else float(-reward)
+
 # for testing
 if __name__ == '__main__': # TODO finish here
     from soko_pap import PushAndPullSokobanEnv
@@ -79,7 +88,7 @@ if __name__ == '__main__': # TODO finish here
 
     random.seed(2)
 
-    env = EnvWrapper(num_boxes=2, compliance=1)
+    env = EnvWrapper(num_boxes=1, compliance=1)
     env.render()
 
     action = 8 # Move right
@@ -90,6 +99,11 @@ if __name__ == '__main__': # TODO finish here
     action = env.sample_action()
     state, reward, done, info = env.step(action)
     # print(state, reward, done, info)
+    env.render()
+    env.reset()
+    env.render()
+
+    env.change_board()
     env.render()
 
     input()
