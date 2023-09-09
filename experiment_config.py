@@ -34,13 +34,13 @@ Default hyper-parameters values (the tested hyperparameter will override its val
 '''
 
 batch_size = 2 if DEBUG else 32
-train_action_value_freq_update = 2 if DEBUG else 8
+train_action_value_freq_update = 1
 
-env_params = {'compliance': 0.9, 'num_boxes': 1}
-algorithm_params = {'learning_rate': 0.9, 'gamma': 0.99, 'epsilon': 1.0, 'ep_decay': 0.99,
+env_params = {'compliance': 1, 'num_boxes': 1}
+algorithm_params = {'learning_rate': 0.001, 'gamma': 0.9, 'epsilon': 0.99, 'ep_decay': 0.99,
                     'num_episodes': train_num_episodes, 'steps_cutoff': train_steps_cutoff,
-                    'batch_size': batch_size, 'target_freq_update': 16, 'memory_buffer_size':1000,
-                    'layers_sizes': [32], 'fixed_board': True, 'train_action_value_freq_update': train_action_value_freq_update}
+                    'batch_size': batch_size, 'target_freq_update': 10, 'memory_buffer_size': 10000,
+                    'layers_sizes': [16, 32], 'fixed_board': True, 'train_action_value_freq_update': train_action_value_freq_update}
 
 '''
 Add to the list numeric hyper-parameter that you want to force to plot as catergorical (using bar plot)
@@ -66,4 +66,6 @@ tested_parameters = {'layers_sizes': [[16], [32], [64], [16,16], [32,32], [16,32
                      'ep_decay': [0.9, 0.95, 0.99],
                      }
 
-tested_parameters = {'layers_sizes': [[16], [32], [64], [16,16], [32,32], [16,32], [32, 16]]}
+tested_parameters = {
+                     'ep_decay': [0.999, 0.99, 0.9, 0.75, 0.5]
+                     }
