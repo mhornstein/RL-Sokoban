@@ -31,10 +31,10 @@ def train_action_value_network(action_value_net, target_net, batch, gamma, crite
     In this part, we Convert all the matrices
     Only this part was inspired by the ATARI DQN implamantation paper: https://github.com/BY571/DQN-Atari-Agents/blob/master/Agents/dqn_agent.py
     '''
-    states = torch.FloatTensor(states)
+    states = torch.stack([torch.tensor(arr, dtype=torch.float32) for arr in states], dim=0)
     actions = torch.LongTensor(actions).unsqueeze(1)
     rewards = torch.FloatTensor(rewards).unsqueeze(1)
-    next_states = torch.FloatTensor(next_states)
+    next_states = torch.stack([torch.tensor(arr, dtype=torch.float32) for arr in next_states], dim=0)
     dones = torch.FloatTensor(dones).unsqueeze(1)
 
     q_values = action_value_net(states).gather(1, actions)
@@ -56,10 +56,10 @@ def train_action_value_network(action_value_net, target_net, batch, gamma, crite
     optimizer.step()
 
     # Compute accuracy and loss
-    predicted_actions = torch.argmax(q_values, dim=1)
+    predicted_actions = torch.argmax(action_value_net(states), dim=1)
     accuracy = (predicted_actions == actions.squeeze()).float().mean()
 
-    return loss.item(), accuracy.item()
+    return loss.item(), accuracy.item(), torch.mean(next_q_values).item()
 
 def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         target_freq_update, memory_buffer_size, learning_rate, steps_cutoff, fixed_board,
@@ -86,7 +86,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
 
     # Start running episodes
     for ep in range(1, num_episodes+1):
-        print(f'running ep: {ep}. Steps: ', end ='')
+        # print(f'running ep: {ep}. Steps: ', end ='')
         if not fixed_board:
             env.change_board()
         s = env.reset()
@@ -97,7 +97,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         reward_sum = 0
 
         while not done and steps_count < steps_cutoff:
-            print(f'{steps_count}', end= ' ')
+            # print(f'{steps_count}', end= ' ')
             # Step 1: Choose an action a based on current policy (e.g. 𝜀 − 𝑔𝑟𝑒𝑒𝑑𝑦))
             if np.random.rand() <= epsilon:
                 a = env.sample_action()
@@ -116,25 +116,25 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
             # Step 4: train the agent network
             if len(memory_buffer) > batch_size and steps_count % train_action_value_freq_update == 0:
                 batch = zip(*random.sample(memory_buffer, batch_size))
-                loss, accuracy = train_action_value_network(action_value_net, target_net, batch, gamma, criterion, optimizer)
+                loss, accuracy, q_value = train_action_value_network(action_value_net, target_net, batch, gamma, criterion, optimizer)
                 net_performance.append({
                     'ep': ep,
                     'steps_count': steps_count,
                     'loss': loss,
+                    'q_value': q_value,
                     'accuracy': accuracy
                 })
 
-            # Step 5: Every target_update_freq update the target net
-            if ep % target_freq_update == 0:
-                target_net.load_state_dict(action_value_net.state_dict())
-
-            # Step 6: update to the new state
-            # env.render()
+            # Step 5: update to the new state
+            env.render()
             s = s_tag
             reward_sum += r
             steps_count += 1
 
-        epsilon *= ep_decay  # Decay exploration rate
+        epsilon = max(epsilon*ep_decay, 0.05)  # Decay exploration rate
+
+        if ep % target_freq_update == 0:
+            target_net.load_state_dict(action_value_net.state_dict())
 
         if done:
             done_count += 1
