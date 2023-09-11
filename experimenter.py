@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from PyTorchDQN import dqn
+from DQN import dqn
 from EnvWrapper import EnvWrapper
 from experiment_config import *
 from reports_util import log_training_process, log_net_performance, create_report
