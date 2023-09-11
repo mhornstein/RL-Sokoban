@@ -37,7 +37,7 @@ def log_training_process(experiment_log_dir, episodes_steps, episodes_rewards):
 
 def log_net_performance(experiment_log_path, net_performance):
     with open(f'{experiment_log_path}/net_performance.csv', 'w', newline='') as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=['ep', 'steps_count', 'loss', 'q_value', 'accuracy'])
+        writer = csv.DictWriter(csv_file, fieldnames=list(net_performance[0].keys()))
         writer.writeheader()
 
         for data_row in net_performance:

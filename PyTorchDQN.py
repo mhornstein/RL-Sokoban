@@ -55,11 +55,7 @@ def train_action_value_network(action_value_net, target_net, batch, gamma, crite
     loss.backward()
     optimizer.step()
 
-    # Compute accuracy and loss
-    predicted_actions = torch.argmax(action_value_net(states), dim=1)
-    accuracy = (predicted_actions == actions.squeeze()).float().mean()
-
-    return loss.item(), accuracy.item(), torch.mean(next_q_values).item()
+    return loss.item()
 
 def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         target_freq_update, memory_buffer_size, learning_rate, steps_cutoff, fixed_board,
@@ -116,13 +112,11 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
             # Step 4: train the agent network
             if len(memory_buffer) > batch_size and steps_count % train_action_value_freq_update == 0:
                 batch = zip(*random.sample(memory_buffer, batch_size))
-                loss, accuracy, q_value = train_action_value_network(action_value_net, target_net, batch, gamma, criterion, optimizer)
+                loss = train_action_value_network(action_value_net, target_net, batch, gamma, criterion, optimizer)
                 net_performance.append({
                     'ep': ep,
                     'steps_count': steps_count,
-                    'loss': loss,
-                    'q_value': q_value,
-                    'accuracy': accuracy
+                    'loss': loss
                 })
 
             # Step 5: update to the new state
