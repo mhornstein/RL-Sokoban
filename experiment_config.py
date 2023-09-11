@@ -8,12 +8,6 @@ random.seed(2)
 DEBUG = False
 
 '''
-This is the number of time a given hyper-parameter value will be evaluated (i.e. "sample size").
-At the end, the mean of the resulting metrices will be calculated and presented.
-'''
-num_of_experiments_per_value = 1
-
-'''
 Training-phase parameters:
 train_num_episodes - the number of episodes for the training
 train_steps_cutoff - maximal steps allowed per episode

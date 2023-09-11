@@ -25,14 +25,11 @@ def save_lineplot(data, path, title, xlabel, ylabel):
     plt.clf()
     plt.close()
 
-def log_training_process(experiment_log_dir, episodes_steps, episodes_rewards):
-    if not os.path.exists(experiment_log_dir):
-        os.makedirs(experiment_log_dir)
-
+def log_training_process(log_dir, episodes_steps, episodes_rewards):
     plt.clf()
-    save_lineplot(data=episodes_steps, path=f'{experiment_log_dir}/Convergence_Graph__Episodes_steps.png',
+    save_lineplot(data=episodes_steps, path=f'{log_dir}/Convergence_Graph__Episodes_steps.png',
                   title='Convergence Graph: Episodes steps', xlabel='Episode number', ylabel='Steps')
-    save_lineplot(data=episodes_rewards, path=f'{experiment_log_dir}/Convergence_Graph__Episodes_reward.png',
+    save_lineplot(data=episodes_rewards, path=f'{log_dir}/Convergence_Graph__Episodes_reward.png',
                   title='Convergence Graph: Episodes reward', xlabel='Episode number', ylabel='Reward')
 
 def log_net_performance(experiment_log_path, net_performance):
@@ -53,7 +50,6 @@ def create_header(subplot, header):
 
 def plot_mean_steps(df, tested_parameter, ax):
     df = df[[tested_parameter, 'total_steps_avg']]
-    df = df.groupby([tested_parameter]).mean().reset_index()
     if df[tested_parameter].dtype == bool or df[tested_parameter].dtype == object or tested_parameter in force_categoric_plot:
         sns.barplot(data=df, x=tested_parameter, y='total_steps_avg', palette=palette, ax=ax)
     else: # this is a numeric value
@@ -63,7 +59,6 @@ def plot_mean_steps(df, tested_parameter, ax):
 
 def plot_done_episodes_count(df, tested_parameter, total_episodes_count, ax):
     df = df[[tested_parameter, 'done_episodes_count']]
-    df = df.groupby([tested_parameter]).mean().reset_index()
     if df[tested_parameter].dtype == bool or df[tested_parameter].dtype == object or tested_parameter in force_categoric_plot:
         sns.barplot(data=df, x=tested_parameter, y='done_episodes_count', palette=palette, ax=ax)
     else: # this is a numeric value

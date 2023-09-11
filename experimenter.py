@@ -21,12 +21,12 @@ def init_results_files(tested_parameter, result_path):
     # Test and train stats csv files
     test_result_file = f'{result_path}/test_result_{tested_parameter}.csv'
     f = open(test_result_file, 'w')
-    f.write(f'{tested_parameter},experiment_number,done_episodes_count,undone_episodes_count,done_episodes_avg_steps,total_steps_avg\n')
+    f.write(f'{tested_parameter},done_episodes_count,undone_episodes_count,done_episodes_avg_steps,total_steps_avg\n')
     f.close()
 
     train_result_file = f'{result_path}/train_result_{tested_parameter}.csv'
     f = open(train_result_file, 'w')
-    f.write(f'{tested_parameter},experiment_number,done_episodes_count,total_episodes_count,total_steps_avg,rewards_avg\n')
+    f.write(f'{tested_parameter},done_episodes_count,total_episodes_count,total_steps_avg,rewards_avg\n')
     f.close()
 
     return train_result_file, test_result_file
@@ -67,7 +67,7 @@ def evaluate_policy(env, policy, fix_board, num_episodes, steps_cutoff):
 
     return successful_finish_count, unsuccessful_finish_count, successful_finish_steps_avg, total_steps_avg
 
-def run_experiment(env_params, algorithm_params, tested_parameter, tested_values, num_of_experiments_per_value):
+def run_experiment(env_params, algorithm_params, tested_parameter, tested_values):
     algorithm_params_cpy = algorithm_params.copy()
     env_params_cpy = env_params.copy()
 
@@ -98,34 +98,33 @@ def run_experiment(env_params, algorithm_params, tested_parameter, tested_values
         if not os.path.exists(parameter_train_log_path):
             os.makedirs(parameter_train_log_path)
 
-        for experiment in range(1, num_of_experiments_per_value + 1):
-            #################
-            # Step 1: Train #
-            #################
-            print("Start training")
-            policy, done_count, episodes_steps, episodes_rewards, net_performance = dqn(**algorithm_params_cpy)
+        #################
+        # Step 1: Train #
+        #################
+        print("Start training")
+        policy, done_count, episodes_steps, episodes_rewards, net_performance = dqn(**algorithm_params_cpy)
 
-            # First - log training process
-            experiment_log_path = f'{parameter_train_log_path}/{experiment}'
-            log_training_process(experiment_log_path, episodes_steps, episodes_rewards)
-            log_net_performance(experiment_log_path, net_performance)
+        # First - log training process
+        log_training_process(parameter_train_log_path, episodes_steps, episodes_rewards)
+        log_net_performance(parameter_train_log_path, net_performance)
 
-            # Then - log training results
-            f = open(train_result_file, 'a')
-            total_steps_avg = np.mean(episodes_steps)
-            rewards_avg = np.mean(episodes_rewards)
-            f.write(f'{esc_parameter_value},{experiment},{done_count},{algorithm_params_cpy["num_episodes"]},{total_steps_avg},{rewards_avg}\n')
-            f.close()
+        # Then - log training results
+        f = open(train_result_file, 'a')
+        total_steps_avg = np.mean(episodes_steps)
+        rewards_avg = np.mean(episodes_rewards)
+        f.write(f'{esc_parameter_value},{done_count},{algorithm_params_cpy["num_episodes"]},{total_steps_avg},{rewards_avg}\n')
+        f.close()
 
-            ################
-            # Step 2: Test #
-            ################
-            print('Start testing')
-            done_episodes_count, undone_episodes_count, done_episodes_avg_steps, total_steps_avg = evaluate_policy(env, policy, fix_board=algorithm_params_cpy['fixed_board'], num_episodes=test_num_episodes, steps_cutoff=test_steps_cutoff)
+        ################
+        # Step 2: Test #
+        ################
+        print('Start testing')
+        done_episodes_count, undone_episodes_count, done_episodes_avg_steps, total_steps_avg = evaluate_policy(env, policy, fix_board=algorithm_params_cpy['fixed_board'], num_episodes=test_num_episodes, steps_cutoff=test_steps_cutoff)
 
-            f = open(test_result_file, 'a')
-            f.write(f'{esc_parameter_value},{experiment},{done_episodes_count},{undone_episodes_count},{done_episodes_avg_steps},{total_steps_avg}\n')
-            f.close()
+        f = open(test_result_file, 'a')
+        f.write(f'{esc_parameter_value},{done_episodes_count},{undone_episodes_count},{done_episodes_avg_steps},{total_steps_avg}\n')
+        f.close()
+
         create_report(result_path, tested_parameter, train_result_file, test_result_file)
 
         end_time = time.time()
@@ -137,7 +136,7 @@ if __name__ == '__main__':
 
     for tested_parameter, tested_values in tested_parameters.items():
         print(f'Testing: {tested_parameter}. values: {tested_values}')
-        run_experiment(env_params, algorithm_params, tested_parameter, tested_values, num_of_experiments_per_value)
+        run_experiment(env_params, algorithm_params, tested_parameter, tested_values)
 
     end_time = time.time()
     execution_time = end_time - start_time
