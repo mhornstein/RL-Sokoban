@@ -37,7 +37,7 @@ batch_size = 2 if DEBUG else 32
 train_action_value_freq_update = 1
 
 env_params = {'compliance': 1, 'num_boxes': 1}
-algorithm_params = {'learning_rate': 0.001, 'gamma': 0.9, 'epsilon': 0.99, 'ep_decay': 0.99,
+algorithm_params = {'learning_rate': 0.001, 'gamma': 0.9, 'epsilon': 0.99, 'ep_decay': 0.9,
                     'num_episodes': train_num_episodes, 'steps_cutoff': train_steps_cutoff,
                     'batch_size': batch_size, 'target_freq_update': 10, 'memory_buffer_size': 10000,
                     'layers_sizes': [16, 32], 'fixed_board': True, 'train_action_value_freq_update': train_action_value_freq_update}
