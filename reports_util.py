@@ -32,12 +32,12 @@ def log_training_process(log_dir, episodes_steps, episodes_rewards):
     save_lineplot(data=episodes_rewards, path=f'{log_dir}/Convergence_Graph__Episodes_reward.png',
                   title='Convergence Graph: Episodes reward', xlabel='Episode number', ylabel='Reward')
 
-def log_net_performance(experiment_log_path, net_performance):
-    with open(f'{experiment_log_path}/net_performance.csv', 'w', newline='') as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=list(net_performance[0].keys()))
+def log_train_loss(log_dir, train_loss):
+    with open(f'{log_dir}/train_loss.csv', 'w', newline='') as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=list(train_loss[0].keys()))
         writer.writeheader()
 
-        for data_row in net_performance:
+        for data_row in train_loss:
             writer.writerow(data_row)
 
 #########################
