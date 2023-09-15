@@ -110,7 +110,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
             memory_buffer.append((s, a, r, s_tag, done))
 
             # Step 4: train the agent network
-            if len(memory_buffer) > batch_size and steps_count % train_action_value_freq_update == 0:
+            if len(memory_buffer) >= batch_size and steps_count % train_action_value_freq_update == 0:
                 batch = zip(*random.sample(memory_buffer, batch_size))
                 loss = train_action_value_network(action_value_net, target_net, batch, gamma, criterion, optimizer)
                 net_performance.append({

@@ -49,8 +49,10 @@ tested_parameters = {'layers_sizes': [[16], [32], [64], [16,16], [32,32], [16,32
                      'target_freq_update': [4, 10, 8, 16, 32],
                      'memory_buffer_size': [100, 1000, 10000, 100000],
                      'compliance': [0.8, 0.9, 1],
-                     'learning_rate': [0.8, 0.9, 0.99],
+                     'learning_rate': [0.01, 0.05, 0.001, 0.005, 0.0001],
                      'gamma': [0.8, 0.9, 0.99],
                      'ep_decay': [0.5, 0.75, 0.9, 0.99],
                      'train_action_value_freq_update': [1, 4, 8, 16,32]
                      }
+
+tested_parameters = { 'gamma': [0.5, 0.75, 0.9, 0.99] }
