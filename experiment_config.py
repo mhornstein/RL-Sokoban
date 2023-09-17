@@ -25,10 +25,10 @@ Default hyper-parameters values (the tested hyperparameter will override its val
 '''
 
 env_params = {'compliance': 1, 'num_boxes': 1}
-algorithm_params = {'learning_rate': 0.001, 'gamma': 0.9, 'epsilon': 0.99, 'ep_decay': 0.9,
+algorithm_params = {'learning_rate': 0.001, 'gamma': 0.999, 'epsilon': 1, 'ep_decay': 0.999,
                     'num_episodes': train_num_episodes, 'steps_cutoff': train_steps_cutoff,
                     'batch_size': 32, 'target_freq_update': 10, 'memory_buffer_size': 10000,
-                    'layers_sizes': [16, 32], 'fixed_board': True, 'train_action_value_freq_update': 1}
+                    'layers_sizes': [64, 64, 64], 'fixed_board': True, 'train_action_value_freq_update': 1}
 
 '''
 Add to the list numeric hyper-parameter that you want to force to plot as catergorical (using bar plot)
@@ -55,4 +55,4 @@ tested_parameters = {'layers_sizes': [[16], [32], [64], [16,16], [32,32], [16,32
                      'train_action_value_freq_update': [1, 4, 8, 16,32]
                      }
 
-tested_parameters = { 'gamma': [0.5, 0.75, 0.9, 0.99] }
+tested_parameters = { 'learning_rate': [0.0005, 0.00005, 0.0001, 0.00001]}

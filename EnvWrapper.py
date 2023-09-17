@@ -77,8 +77,12 @@ class EnvWrapper(gym.Env):
     def calc_reward(self):
         reward = 0
         room_state = self.env.room_state
+        agent_position = np.argwhere(room_state == 5)
         box_positions = np.argwhere(room_state == 4)
+        filled_positions = np.argwhere(room_state == 3)
         target_positions = np.argwhere(room_state == 2)
+        if len(agent_position) + len(filled_positions) + len(target_positions) == self.num_boxes: # the agent stands on a target
+            target_positions = np.append(target_positions, agent_position, axis=0)
         for box_position in box_positions:
             for target_position in target_positions:
                 manhattan_distance = np.sum(np.abs(box_position - target_position))

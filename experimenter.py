@@ -67,9 +67,8 @@ def evaluate_policy(env, policy, fix_board, num_episodes, steps_cutoff):
 
     return successful_finish_count, unsuccessful_finish_count, successful_finish_steps_avg, total_steps_avg
 
-def run_experiment(env_params, algorithm_params, tested_parameter, tested_values):
+def run_experiment(env, algorithm_params, tested_parameter, tested_values):
     algorithm_params_cpy = algorithm_params.copy()
-    env_params_cpy = env_params.copy()
 
     result_path = f'./results_{tested_parameter}'
     train_result_file, test_result_file = init_results_files(tested_parameter, result_path)
@@ -85,15 +84,11 @@ def run_experiment(env_params, algorithm_params, tested_parameter, tested_values
 
         esc_parameter_value = escape(parameter_value)
 
-        if tested_parameter in env_params_cpy:
-            env_params_cpy[tested_parameter] = parameter_value
-        else:
-            algorithm_params_cpy[tested_parameter] = parameter_value
+        algorithm_params_cpy[tested_parameter] = parameter_value
 
-        env = EnvWrapper(**env_params_cpy)
         algorithm_params_cpy['env'] = env
 
-        print(f'running experiment: Algo params: {algorithm_params_cpy}, Env params: {env_params_cpy}')
+        print(f'running experiment: Algo params: {algorithm_params_cpy}, Env: {env}')
         parameter_train_log_path = f'{train_log_path}/{tested_parameter}_{esc_parameter_value}'  # Create training log path
         if not os.path.exists(parameter_train_log_path):
             os.makedirs(parameter_train_log_path)
@@ -134,9 +129,12 @@ def run_experiment(env_params, algorithm_params, tested_parameter, tested_values
 if __name__ == '__main__':
     start_time = time.time()
 
+    random.seed(2)  # keeping seed as in the assigment notebook
+    env = EnvWrapper(**env_params)
+
     for tested_parameter, tested_values in tested_parameters.items():
         print(f'Testing: {tested_parameter}. values: {tested_values}')
-        run_experiment(env_params, algorithm_params, tested_parameter, tested_values)
+        run_experiment(env, algorithm_params, tested_parameter, tested_values)
 
     end_time = time.time()
     execution_time = end_time - start_time
