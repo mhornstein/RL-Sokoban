@@ -103,11 +103,14 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         layers_sizes, train_action_value_freq_update):
     policy = QNN()
     target = QNN()
-    buffer= ReplayMemory(memory_buffer_size, batch_size)
-    optimizer = SGD(policy.parameters(), lr=learning_rate)
     update_target(policy, target)
 
+    buffer= ReplayMemory(memory_buffer_size, batch_size)
+    optimizer = SGD(policy.parameters(), lr=learning_rate)
+
+    done_count = 0
     losses, rewards, episodes_steps = [], [], []
+
     for i in range(1, num_episodes+1):
         print("\nEpisode: ", i)
         state = get_state_tensor(env.reset())
@@ -115,7 +118,6 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         episode_reward = 0
         episode_loss = 0
         num_steps = 1
-        done_count = 0
         while not done and num_steps <= steps_cutoff:
             print(num_steps, end = " ")
             action = epsilon_greedy_action(epsilon, state, env, policy)
