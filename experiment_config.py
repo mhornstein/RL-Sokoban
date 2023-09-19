@@ -30,12 +30,6 @@ algorithm_params = {'learning_rate': 0.001, 'gamma': 0.999, 'epsilon': 1, 'ep_de
                     'batch_size': 32, 'target_freq_update': 10, 'memory_buffer_size': 10000,
                     'layers_sizes': [64, 64, 64], 'fixed_board': True, 'train_action_value_freq_update': 1}
 
-'''
-Add to the list numeric hyper-parameter that you want to force to plot as catergorical (using bar plot)
-instead of numeric (using lineplot) in the final report
-'''
-force_categoric_plot = ['batch_size', 'target_freq_update', 'memory_buffer_size']
-
 #######################################
 # Tested hyperparameter configuration #
 #######################################

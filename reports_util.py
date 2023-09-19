@@ -6,8 +6,6 @@ from matplotlib.gridspec import GridSpec
 import seaborn as sns
 import csv
 
-from experiment_config import force_categoric_plot
-
 palette = 'Set2'
 
 def save_heatmap(data, path, fmt='.2g', annot_kws=None):
@@ -46,19 +44,13 @@ def create_header(subplot, header):
 
 def plot_mean_steps(df, tested_parameter, ax):
     df = df[[tested_parameter, 'total_steps_avg']]
-    if df[tested_parameter].dtype == bool or df[tested_parameter].dtype == object or tested_parameter in force_categoric_plot:
-        sns.barplot(data=df, x=tested_parameter, y='total_steps_avg', palette=palette, ax=ax)
-    else: # this is a numeric value
-        sns.lineplot(data=df, x=tested_parameter, y='total_steps_avg', color=sns.color_palette(palette)[0], marker="o", ax=ax)
+    sns.barplot(data=df, x=tested_parameter, y='total_steps_avg', palette=palette, ax=ax)
     ax.set(xlabel=ax.get_xlabel().replace('_', ' '))
     ax.set(ylabel=ax.get_ylabel().replace('_', ' '))
 
 def plot_done_episodes_count(df, tested_parameter, total_episodes_count, ax):
     df = df[[tested_parameter, 'done_episodes_count']]
-    if df[tested_parameter].dtype == bool or df[tested_parameter].dtype == object or tested_parameter in force_categoric_plot:
-        sns.barplot(data=df, x=tested_parameter, y='done_episodes_count', palette=palette, ax=ax)
-    else: # this is a numeric value
-        sns.lineplot(data=df, x=tested_parameter, y='done_episodes_count', color=sns.color_palette(palette)[0], marker="o", ax=ax)
+    sns.barplot(data=df, x=tested_parameter, y='done_episodes_count', palette=palette, ax=ax)
     ax.set(xlabel=ax.get_xlabel().replace('_', ' '))
     ax.set(ylabel=f"avg {ax.get_ylabel().replace('_', ' ')} [in {total_episodes_count} episodes]")
 
