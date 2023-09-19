@@ -23,16 +23,14 @@ def save_lineplot(data, path, title, xlabel, ylabel):
     plt.clf()
     plt.close()
 
-def log_training_process(log_dir, episodes_steps, episodes_rewards):
+def log_training_process(log_dir, episodes_loss, episodes_steps, episodes_rewards):
     plt.clf()
+    save_lineplot(data=episodes_loss, path=f'{log_dir}/Convergence_Graph__Episodes_loss.png',
+                  title='Convergence Graph: Episodes Loss', xlabel='Episode number', ylabel='Loss')
     save_lineplot(data=episodes_steps, path=f'{log_dir}/Convergence_Graph__Episodes_steps.png',
                   title='Convergence Graph: Episodes steps', xlabel='Episode number', ylabel='Steps')
     save_lineplot(data=episodes_rewards, path=f'{log_dir}/Convergence_Graph__Episodes_reward.png',
                   title='Convergence Graph: Episodes reward', xlabel='Episode number', ylabel='Reward')
-
-def log_train_loss(log_dir, train_loss):
-    save_lineplot(data=train_loss, path=f'{log_dir}/Convergence_Graph__network_loss.png',
-                  title='Convergence Graph: Loss', xlabel='Episode number', ylabel='Loss')
 
 #########################
 ## full report generation

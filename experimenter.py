@@ -3,7 +3,7 @@ import numpy as np
 from DQN import dqn
 from EnvWrapper import EnvWrapper
 from experiment_config import *
-from reports_util import log_training_process, log_train_loss, create_report
+from reports_util import log_training_process, create_report
 import time
 
 def escape(value):
@@ -97,11 +97,10 @@ def run_experiment(env, algorithm_params, tested_parameter, tested_values):
         # Step 1: Train #
         #################
         print("Start training")
-        policy, done_count, episodes_steps, episodes_rewards, train_loss = dqn(**algorithm_params_cpy)
+        policy, done_count, episodes_steps, episodes_rewards, episodes_loss = dqn(**algorithm_params_cpy)
 
         # First - log training process
-        log_training_process(parameter_train_log_path, episodes_steps, episodes_rewards)
-        log_train_loss(parameter_train_log_path, train_loss)
+        log_training_process(parameter_train_log_path, episodes_loss, episodes_steps, episodes_rewards)
 
         # Then - log training results
         f = open(train_result_file, 'a')
