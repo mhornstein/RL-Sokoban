@@ -109,7 +109,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
     optimizer = SGD(policy_net.parameters(), lr=learning_rate)
 
     done_count = 0
-    losses, rewards, episodes_steps = [], [], []
+    episodes_loss, episodes_rewards, episodes_steps = [], [], []
 
     for i in range(1, num_episodes+1):
         print("\nEpisode: ", i)
@@ -133,8 +133,8 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
                 episode_loss += loss
             num_steps += 1
 
-        rewards.append(episode_reward)
-        losses.append(episode_loss / num_steps)
+        episodes_rewards.append(episode_reward)
+        episodes_loss.append(episode_loss / num_steps)
         episodes_steps.append(num_steps)
 
         if i % target_freq_update == 0:
@@ -148,7 +148,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
       #   self.MidWay = QNN().to(device)
       #   self.update_target(self.MidWay)
 
-    def policy_func(s):
+    def policy(s):
         '''
         This function gets a state and returns the preferable action.
         It does it by providing the state to the network and returning the action with maximal q-value
@@ -160,5 +160,4 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         a = q_values.max(1)[1].view(1, 1)
         return a.item()
 
-    # policy_net, done_count, episodes_steps, episodes_rewards, episodes_loss
-    return policy_func, done_count, episodes_steps, rewards, losses
+    return policy, done_count, episodes_steps, episodes_rewards, episodes_loss
