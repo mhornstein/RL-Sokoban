@@ -101,7 +101,7 @@ def run_experiment(env, algorithm_params, tested_parameter, tested_values):
 
         # First - log training process
         log_training_process(parameter_train_log_path, episodes_steps, episodes_rewards)
-        # log_train_loss(parameter_train_log_path, train_loss) # TODO plot loss
+        log_train_loss(parameter_train_log_path, train_loss)
 
         # Then - log training results
         f = open(train_result_file, 'a')

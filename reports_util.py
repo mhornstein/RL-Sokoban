@@ -33,12 +33,8 @@ def log_training_process(log_dir, episodes_steps, episodes_rewards):
                   title='Convergence Graph: Episodes reward', xlabel='Episode number', ylabel='Reward')
 
 def log_train_loss(log_dir, train_loss):
-    with open(f'{log_dir}/train_loss.csv', 'w', newline='') as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=list(train_loss[0].keys()))
-        writer.writeheader()
-
-        for data_row in train_loss:
-            writer.writerow(data_row)
+    save_lineplot(data=train_loss, path=f'{log_dir}/Convergence_Graph__network_loss.png',
+                  title='Convergence Graph: Loss', xlabel='Episode number', ylabel='Loss')
 
 #########################
 ## full report generation
