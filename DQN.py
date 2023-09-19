@@ -26,7 +26,7 @@ class QNN(nn.Module):
     def forward(self, x):
         return self.model(x)
 
-def get_state_tensor(state, done=False):
+def state_to_tensor(state, done=False):
     if done:
         return None
     return torch.tensor(state, dtype=torch.float32).permute(2, 0, 1).unsqueeze(0)
@@ -49,21 +49,22 @@ class ReplayMemory(object):
         batch = random.sample(self.memory_baffer, self.batch_size)
         return self.transition(*zip(*batch))
 
-def epsilon_greedy_action(epsilon, state, env, policy_net):
-    if random.random() < epsilon:
-        return torch.tensor([[env.sample_action()]], dtype=torch.long)
-    else:
+def pick_action(epsilon, state, env, policy_net):
+    '''
+    Selects an action based on the epsilon-greedy strategy, which balances exploration and exploitation.
+    '''
+    if random.random() >= epsilon:
         with torch.no_grad():
             return policy_net(state).max(1)[1].view(1, 1)
+    else:
+        return torch.tensor([[env.sample_action()]], dtype=torch.long)
 
-def update_target(policy_net, target_net):
+
+def update_target_net(policy_net, target_net):
     target_net.load_state_dict(policy_net.state_dict())
 
-def update_epsilon(epsilon, decay):
-    epsilon *= decay
-    if epsilon < 0.05:
-        epsilon = 0.05
-    return epsilon
+def update_epsilon(epsilon, ep_decay):
+    return max(epsilon * ep_decay, 0.05)
 
 def update_model(buffer, policy_net, target_net, batch_size, discount_factor, optimizer):
     "The heart of DQN Algorithm"
@@ -103,7 +104,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         layers_sizes, train_action_value_freq_update):
     policy_net = QNN()
     target_net = QNN()
-    update_target(policy_net, target_net)
+    update_target_net(policy_net, target_net)
 
     buffer= ReplayMemory(memory_buffer_size, batch_size)
     optimizer = SGD(policy_net.parameters(), lr=learning_rate)
@@ -113,40 +114,41 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
 
     for i in range(1, num_episodes+1):
         print("\nEpisode: ", i)
-        state = get_state_tensor(env.reset())
+
         done = False
         episode_reward = 0
         episode_loss = 0
         num_steps = 1
+
+        state = state_to_tensor(env.reset())
+
         while not done and num_steps <= steps_cutoff:
             print(num_steps, end = " ")
-            action = epsilon_greedy_action(epsilon, state, env, policy_net)
-            epsilon = update_epsilon(epsilon, ep_decay)
+            action = pick_action(epsilon, state, env, policy_net)
             next_state, reward, done, info = env.step(action.item())
-            next_state = get_state_tensor(next_state, done)
             episode_reward += reward
+
+            next_state = state_to_tensor(next_state, done)
             reward = torch.tensor([reward])
             buffer.push(state, action, next_state, reward)
-            state = next_state
+
             if len(buffer) >= batch_size and num_steps % train_action_value_freq_update == 0:
                 loss = update_model(buffer, policy_net, target_net, batch_size, gamma, optimizer)
                 episode_loss += loss
+
             num_steps += 1
+            epsilon = update_epsilon(epsilon, ep_decay)
+            state = next_state
 
         episodes_rewards.append(episode_reward)
         episodes_loss.append(episode_loss / num_steps)
         episodes_steps.append(num_steps)
 
         if i % target_freq_update == 0:
-            update_target(policy_net, target_net)
+            update_target_net(policy_net, target_net)
 
         if done:
             done_count += 1
-
-      # save the MidWay parameters to show
-      # if num_episodes / 2 == i:
-      #   self.MidWay = QNN().to(device)
-      #   self.update_target(self.MidWay)
 
     def policy(s):
         '''
@@ -154,7 +156,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         It does it by providing the state to the network and returning the action with maximal q-value
         (i.e. this is a greedy policy_net)
         '''
-        state_tensor = get_state_tensor(s)
+        state_tensor = state_to_tensor(s)
         with torch.no_grad():
             q_values = policy_net(state_tensor)
         a = q_values.max(1)[1].view(1, 1)
