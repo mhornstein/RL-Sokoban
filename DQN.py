@@ -49,15 +49,15 @@ class ReplayMemory(object):
         batch = random.sample(self.memory_baffer, self.batch_size)
         return self.transition(*zip(*batch))
 
-def epsilon_greedy_action(epsilon, state, env, policy):
+def epsilon_greedy_action(epsilon, state, env, policy_net):
     if random.random() < epsilon:
         return torch.tensor([[env.sample_action()]], dtype=torch.long)
     else:
         with torch.no_grad():
-            return policy(state).max(1)[1].view(1, 1)
+            return policy_net(state).max(1)[1].view(1, 1)
 
-def update_target(policy, target):
-    target.load_state_dict(policy.state_dict())
+def update_target(policy_net, target_net):
+    target_net.load_state_dict(policy_net.state_dict())
 
 def update_epsilon(epsilon, decay):
     epsilon *= decay
@@ -65,7 +65,7 @@ def update_epsilon(epsilon, decay):
         epsilon = 0.05
     return epsilon
 
-def update_model(buffer, policy, target, batch_size, discount_factor, optimizer):
+def update_model(buffer, policy_net, target_net, batch_size, discount_factor, optimizer):
     "The heart of DQN Algorithm"
     batch = buffer.sample()
     state_batch = torch.cat(batch.s)
@@ -75,14 +75,14 @@ def update_model(buffer, policy, target, batch_size, discount_factor, optimizer)
     non_final_mask = torch.tensor(tuple(map(lambda ns: ns is not None, batch.ns)), dtype=torch.bool)
 
     # Compute Q-values for the current state and selected actions
-    q_values = policy(state_batch).gather(1, action_batch)
+    q_values = policy_net(state_batch).gather(1, action_batch)
 
     # Compute the maximum Q-values for the next states
     # use target network to estimate these Q-values to avoid biasing
     # the estimates with the values produced by the policy network
     next_q_values = torch.zeros(batch_size)
     with torch.no_grad():
-        next_q_values[non_final_mask] = target(next_state_batch).max(1)[0]
+        next_q_values[non_final_mask] = target_net(next_state_batch).max(1)[0]
 
     # Compute the target Q-values
     target_q_values = (next_q_values * discount_factor) + reward_batch
@@ -101,12 +101,12 @@ def update_model(buffer, policy, target, batch_size, discount_factor, optimizer)
 def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         target_freq_update, memory_buffer_size, learning_rate, steps_cutoff, fixed_board,
         layers_sizes, train_action_value_freq_update):
-    policy = QNN()
-    target = QNN()
-    update_target(policy, target)
+    policy_net = QNN()
+    target_net = QNN()
+    update_target(policy_net, target_net)
 
     buffer= ReplayMemory(memory_buffer_size, batch_size)
-    optimizer = SGD(policy.parameters(), lr=learning_rate)
+    optimizer = SGD(policy_net.parameters(), lr=learning_rate)
 
     done_count = 0
     losses, rewards, episodes_steps = [], [], []
@@ -120,7 +120,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         num_steps = 1
         while not done and num_steps <= steps_cutoff:
             print(num_steps, end = " ")
-            action = epsilon_greedy_action(epsilon, state, env, policy)
+            action = epsilon_greedy_action(epsilon, state, env, policy_net)
             epsilon = update_epsilon(epsilon, ep_decay)
             next_state, reward, done, info = env.step(action.item())
             next_state = get_state_tensor(next_state, done)
@@ -129,7 +129,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
             buffer.push(state, action, next_state, reward)
             state = next_state
             if len(buffer) >= batch_size and num_steps % train_action_value_freq_update == 0:
-                loss = update_model(buffer, policy, target, batch_size, gamma, optimizer)
+                loss = update_model(buffer, policy_net, target_net, batch_size, gamma, optimizer)
                 episode_loss += loss
             num_steps += 1
 
@@ -138,7 +138,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         episodes_steps.append(num_steps)
 
         if i % target_freq_update == 0:
-            update_target(policy, target)
+            update_target(policy_net, target_net)
 
         if done:
             done_count += 1
@@ -152,13 +152,13 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         '''
         This function gets a state and returns the preferable action.
         It does it by providing the state to the network and returning the action with maximal q-value
-        (i.e. this is a greedy policy)
+        (i.e. this is a greedy policy_net)
         '''
         state_tensor = get_state_tensor(s)
         with torch.no_grad():
-            q_values = policy(state_tensor)
+            q_values = policy_net(state_tensor)
         a = q_values.max(1)[1].view(1, 1)
         return a.item()
 
-
+    # policy_net, done_count, episodes_steps, episodes_rewards, episodes_loss
     return policy_func, done_count, episodes_steps, rewards, losses
