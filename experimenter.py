@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from DQN import dqn
+from DQN3 import dqn
 from EnvWrapper import EnvWrapper
 from experiment_config import *
 from reports_util import log_training_process, log_train_loss, create_report
@@ -101,7 +101,7 @@ def run_experiment(env, algorithm_params, tested_parameter, tested_values):
 
         # First - log training process
         log_training_process(parameter_train_log_path, episodes_steps, episodes_rewards)
-        log_train_loss(parameter_train_log_path, train_loss)
+        # log_train_loss(parameter_train_log_path, train_loss) # TODO plot loss
 
         # Then - log training results
         f = open(train_result_file, 'a')

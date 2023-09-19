@@ -55,4 +55,4 @@ tested_parameters = {'layers_sizes': [[16], [32], [64], [16,16], [32,32], [16,32
                      'train_action_value_freq_update': [1, 4, 8, 16,32]
                      }
 
-tested_parameters = { 'learning_rate': [0.0005, 0.00005, 0.0001, 0.00001]}
+tested_parameters = { 'learning_rate': [0.0001]}
