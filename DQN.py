@@ -59,12 +59,12 @@ def pick_action(epsilon, state, env, policy_net):
     else:
         return torch.tensor([[env.sample_action()]], dtype=torch.long)
 
-
 def update_target_net(policy_net, target_net):
     target_net.load_state_dict(policy_net.state_dict())
 
 def update_epsilon(epsilon, ep_decay):
-    return max(epsilon * ep_decay, 0.05)
+    ep = max(epsilon * ep_decay, 0.05)
+    return ep
 
 def update_model(buffer, policy_net, target_net, batch_size, discount_factor, optimizer):
     "The heart of DQN Algorithm"
