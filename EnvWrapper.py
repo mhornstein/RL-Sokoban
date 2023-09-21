@@ -83,14 +83,18 @@ class EnvWrapper(gym.Env):
         because the agent is penalized more when the boxes are farther from their targets.
         '''
         reward = 0
+
         room_state = self.env.room_state
+        box_x, box_y = np.where(room_state == 4)
+
         room_fixed = self.env.room_fixed
-        box_positions = np.argwhere(room_state == 4)
-        target_positions = np.argwhere(room_fixed == 2)
-        for box_position in box_positions:
-            for target_position in target_positions:
-                manhattan_distance = np.abs(box_position - target_position).sum()
-                reward -= manhattan_distance
+        target_x, target_y = np.where(room_fixed == 2)
+
+        for i in range(len(box_x)):
+            for j in range(len(target_x)):
+                dist = abs(box_x[i] - target_x[j]) + abs(box_y[i] - target_y[j])
+                reward -= dist
+
         return float(reward)
 
     def __str__(self):
