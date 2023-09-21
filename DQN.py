@@ -26,14 +26,8 @@ class QNN(nn.Module):
     def forward(self, x):
         return self.model(x)
 
-def state_to_tensor(state, done=False):
-    if done:
-        return None
-    return torch.tensor(state, dtype=torch.float32).permute(2, 0, 1).unsqueeze(0)
-
-class ReplayMemory:
-    def __init__(self, memory_buffer_size, batch_size):
-        self.batch_size = batch_size
+class ExperienceReplayBuffer:
+    def __init__(self, memory_buffer_size):
         self.buffer = deque([], maxlen=memory_buffer_size)
         self.transition = namedtuple('transition', ('state', 'action', 'reward', 'next_state'))
 
@@ -41,21 +35,27 @@ class ReplayMemory:
         transition = (state, action, reward, next_state)
         self.buffer.append(transition)
 
-    def sample(self):
-        batch = random.sample(self.buffer, self.batch_size)
+    def sample(self, batch_size):
+        batch = random.sample(self.buffer, batch_size)
         return self.transition(*zip(*batch))
 
     def __len__(self):
         return len(self.buffer)
 
+
+def state_to_tensor(state, done=False):
+    if done:
+        return None
+    return torch.tensor(state, dtype=torch.float32).permute(2, 0, 1).unsqueeze(0)
+
 def pick_action(epsilon, state, env, policy_net):
     '''
     Selects an action based on the epsilon-greedy strategy, which balances exploration and exploitation.
     '''
-    if random.random() >= epsilon:
+    if random.random() >= epsilon: # exploitation
         with torch.no_grad():
             return policy_net(state).max(1)[1].view(1, 1)
-    else:
+    else: # exploration
         return torch.tensor([[env.sample_action()]], dtype=torch.long)
 
 def update_target_net(policy_net, target_net):
@@ -67,7 +67,7 @@ def update_epsilon(epsilon, ep_decay):
 
 def train_policy_network(buffer, policy_net, target_net, batch_size, discount_factor, optimizer, criterion):
     # Step 1: sample from data and create the required tensors
-    batch = buffer.sample()
+    batch = buffer.sample(batch_size)
     state_tensor = torch.cat(batch.state)
     action_tensor = torch.cat(batch.action)
     reward_tensor = torch.cat(batch.reward)
@@ -100,7 +100,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
     update_target_net(policy_net, target_net)
     criterion = torch.nn.MSELoss()
 
-    buffer= ReplayMemory(memory_buffer_size, batch_size)
+    buffer= ExperienceReplayBuffer(memory_buffer_size, batch_size)
     optimizer = SGD(policy_net.parameters(), lr=learning_rate)
 
     done_count = 0
