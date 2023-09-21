@@ -100,7 +100,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
     update_target_net(policy_net, target_net)
     criterion = torch.nn.MSELoss()
 
-    buffer= ExperienceReplayBuffer(memory_buffer_size, batch_size)
+    buffer= ExperienceReplayBuffer(memory_buffer_size)
     optimizer = SGD(policy_net.parameters(), lr=learning_rate)
 
     done_count = 0
