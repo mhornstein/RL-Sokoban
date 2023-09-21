@@ -31,23 +31,22 @@ def state_to_tensor(state, done=False):
         return None
     return torch.tensor(state, dtype=torch.float32).permute(2, 0, 1).unsqueeze(0)
 
-class ReplayMemory(object):
-    "stores past experiences as fifo"
-    def __init__(self, capacity, batch_size):
+class ReplayMemory:
+    def __init__(self, memory_buffer_size, batch_size):
         self.batch_size = batch_size
-        self.memory_baffer = deque([], maxlen=capacity)
-        self.transition = namedtuple('T', ('s', 'a', 'ns', 'r'))
+        self.buffer = deque([], maxlen=memory_buffer_size)
+        self.transition = namedtuple('transition', ('state', 'action', 'reward', 'next_state'))
 
-    def __len__(self):
-        return len(self.memory_baffer)
-
-    def push(self, state, action, next_state, reward):
-        transition = (state, action, next_state, reward)
-        self.memory_baffer.append(transition)
+    def push(self, state, action, reward, next_state):
+        transition = (state, action, reward, next_state)
+        self.buffer.append(transition)
 
     def sample(self):
-        batch = random.sample(self.memory_baffer, self.batch_size)
+        batch = random.sample(self.buffer, self.batch_size)
         return self.transition(*zip(*batch))
+
+    def __len__(self):
+        return len(self.buffer)
 
 def pick_action(epsilon, state, env, policy_net):
     '''
@@ -66,33 +65,27 @@ def update_epsilon(epsilon, ep_decay):
     ep = max(epsilon * ep_decay, 0.05)
     return ep
 
-def update_model(buffer, policy_net, target_net, batch_size, discount_factor, optimizer):
-    "The heart of DQN Algorithm"
+def train_policy_network(buffer, policy_net, target_net, batch_size, discount_factor, optimizer, criterion):
+    # Step 1: sample from data and create the required tensors
     batch = buffer.sample()
-    state_batch = torch.cat(batch.s)
-    action_batch = torch.cat(batch.a)
-    reward_batch = torch.cat(batch.r)
-    next_state_batch = torch.cat([ns for ns in batch.ns if ns is not None])
-    non_final_mask = torch.tensor(tuple(map(lambda ns: ns is not None, batch.ns)), dtype=torch.bool)
+    state_tensor = torch.cat(batch.state)
+    action_tensor = torch.cat(batch.action)
+    reward_tensor = torch.cat(batch.reward)
+    next_state_tensor = torch.cat([next_state for next_state in batch.next_state if next_state is not None])
+    non_final_state_mask_tensor = torch.tensor(tuple(map(lambda next_state: next_state is not None, batch.next_state)), dtype=torch.bool)
 
-    # Compute Q-values for the current state and selected actions
-    q_values = policy_net(state_batch).gather(1, action_batch)
+    # Step 2: Calculate Q-values for current states and selected actions
+    q_values_tensor = policy_net(state_tensor).gather(1, action_tensor)
 
-    # Compute the maximum Q-values for the next states
-    # use target network to estimate these Q-values to avoid biasing
-    # the estimates with the values produced by the policy network
+    # Step 3: Calculate the maximum Q-values for the next states using the target network
     next_q_values = torch.zeros(batch_size)
     with torch.no_grad():
-        next_q_values[non_final_mask] = target_net(next_state_batch).max(1)[0]
+        next_q_values[non_final_state_mask_tensor] = target_net(next_state_tensor).max(1)[0]  # Note: final states remains with reward of 0
+    target_q_values = (next_q_values * discount_factor) + reward_tensor
 
-    # Compute the target Q-values
-    target_q_values = (next_q_values * discount_factor) + reward_batch
+    # Step 4: Calculate the loss and update the model accordingly
+    loss = criterion(q_values_tensor, target_q_values.unsqueeze(1))
 
-    # Compute MSE Loss between predicted and target Q-values
-    criterion = torch.nn.MSELoss()
-    loss = criterion(q_values, target_q_values.unsqueeze(1))
-
-    # Optimize the model
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
@@ -105,6 +98,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
     policy_net = QNN()
     target_net = QNN()
     update_target_net(policy_net, target_net)
+    criterion = torch.nn.MSELoss()
 
     buffer= ReplayMemory(memory_buffer_size, batch_size)
     optimizer = SGD(policy_net.parameters(), lr=learning_rate)
@@ -130,10 +124,10 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
 
             next_state = state_to_tensor(next_state, done)
             reward = torch.tensor([reward])
-            buffer.push(state, action, next_state, reward)
+            buffer.push(state, action, reward, next_state)
 
             if len(buffer) >= batch_size and num_steps % train_action_value_freq_update == 0:
-                loss = update_model(buffer, policy_net, target_net, batch_size, gamma, optimizer)
+                loss = train_policy_network(buffer, policy_net, target_net, batch_size, gamma, optimizer, criterion)
                 episode_loss += loss
 
             num_steps += 1
