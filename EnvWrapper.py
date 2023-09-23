@@ -74,25 +74,6 @@ class EnvWrapper(gym.Env):
     def action_space(self):
         return self.env.action_space
 
-    def calc_reward2(self):
-        '''
-        Calculate the Manhattan distance between the positions of boxes (4) in room_state
-        and their corresponding target positions (2) in room_fixed.
-
-        The reward is the negative sum of these Manhattan distances. It is negative
-        because the agent is penalized more when the boxes are farther from their targets.
-        '''
-        reward = 0
-        room_state = self.env.room_state
-        room_fixed = self.env.room_fixed
-        box_positions = np.argwhere(room_state == 4)
-        target_positions = np.argwhere(room_fixed == 2)
-        for box_position in box_positions:
-            for target_position in target_positions:
-                manhattan_distance = np.abs(box_position - target_position).sum()
-                reward -= manhattan_distance
-        return float(reward)
-
     def calc_reward(self):
         '''
         Calculate the Manhattan distance between the positions of boxes (4) in room_state
@@ -107,15 +88,12 @@ class EnvWrapper(gym.Env):
         box_x, box_y = np.where(room_state == 4)
 
         room_fixed = self.env.room_fixed
-        target_x, target_y = np.where(room_fixed == 2)
+        box_target_x, box_target_y = np.where(room_fixed == 2)
 
         for i in range(len(box_x)):
-            for j in range(len(target_x)):
-                dist = abs(box_x[i] - target_x[j]) + abs(box_y[i] - target_y[j])
+            for j in range(len(box_target_x)):
+                dist = abs(box_x[i] - box_target_x[j]) + abs(box_y[i] - box_target_y[j])
                 reward -= dist
-
-        reward2 = self.calc_reward2()
-        assert reward2 == reward
 
         return float(reward)
 
