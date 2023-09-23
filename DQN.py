@@ -93,8 +93,7 @@ def train_policy_network(buffer, policy_net, target_net, batch_size, gamma, opti
     return loss.item()
 
 def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
-        target_freq_update, memory_buffer_size, learning_rate, steps_cutoff, fixed_board,
-        layers_sizes, train_action_value_freq_update):
+        target_freq_update, memory_buffer_size, learning_rate, steps_cutoff, fixed_board, train_action_value_freq_update):
     policy_net = QNN()
     target_net = QNN()
     update_target_net(policy_net, target_net)

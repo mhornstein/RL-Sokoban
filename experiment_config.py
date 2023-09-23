@@ -25,10 +25,10 @@ Default hyper-parameters values (the tested hyperparameter will override its val
 '''
 
 env_params = {'compliance': 1, 'num_boxes': 1}
-algorithm_params = {'learning_rate': 0.001, 'gamma': 0.999, 'epsilon': 1, 'ep_decay': 0.999,
+algorithm_params = {'learning_rate': 0.0001, 'gamma': 0.999, 'epsilon': 1, 'ep_decay': 0.999,
                     'num_episodes': train_num_episodes, 'steps_cutoff': train_steps_cutoff,
                     'batch_size': 32, 'target_freq_update': 10, 'memory_buffer_size': 10000,
-                    'layers_sizes': [64, 64, 64], 'fixed_board': True, 'train_action_value_freq_update': 1}
+                    'fixed_board': True, 'train_action_value_freq_update': 1}
 
 #######################################
 # Tested hyperparameter configuration #
@@ -37,16 +37,13 @@ algorithm_params = {'learning_rate': 0.001, 'gamma': 0.999, 'epsilon': 1, 'ep_de
 remove dictionary keys to test less hyperparameters
 Change the values in the entries to test different hyper-parameters values
 '''
-tested_parameters = {'layers_sizes': [[16], [32], [64], [16,16], [32,32], [16,32], [32, 16]],
-                     'learning_rate': [0.001, 0.005, 0.01, 0.05],
+tested_parameters = {
+                     'learning_rate': [0.0001, 0.0005, 0.001, 0.005],
                      'batch_size': [16, 32, 64, 128, 256],
-                     'target_freq_update': [4, 10, 8, 16, 32],
+                     'target_freq_update': [4, 10, 16, 32],
                      'memory_buffer_size': [100, 1000, 10000, 100000],
-                     'compliance': [0.8, 0.9, 1],
-                     'learning_rate': [0.01, 0.05, 0.001, 0.005, 0.0001],
-                     'gamma': [0.8, 0.9, 0.99],
-                     'ep_decay': [0.5, 0.75, 0.9, 0.99],
-                     'train_action_value_freq_update': [1, 4, 8, 16,32]
+                     'gamma': [0.9, 0.95, 0.999],
+                     'ep_decay': [0.9, 0.95, 0.999],
+                     'epsilon': [0.7, 0.9, 1.0],
+                     'train_action_value_freq_update': [1, 4, 8, 16]
                      }
-
-tested_parameters = { 'learning_rate': [0.0001]}
