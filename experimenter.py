@@ -5,6 +5,7 @@ from EnvWrapper import EnvWrapper
 from experiment_config import *
 from reports_util import log_training_process, create_report
 import time
+import torch
 
 def escape(value):
     '''
@@ -97,7 +98,7 @@ def run_experiment(env, algorithm_params, tested_parameter, tested_values):
         # Step 1: Train #
         #################
         print("Start training")
-        policy, done_count, episodes_steps, episodes_rewards, episodes_loss = dqn(**algorithm_params_cpy)
+        policy, policy_net, done_count, episodes_steps, episodes_rewards, episodes_loss = dqn(**algorithm_params_cpy)
 
         # First - log training process
         log_training_process(parameter_train_log_path, episodes_loss, episodes_steps, episodes_rewards)
@@ -108,6 +109,9 @@ def run_experiment(env, algorithm_params, tested_parameter, tested_values):
         rewards_avg = np.mean(episodes_rewards)
         f.write(f'{esc_parameter_value},{done_count},{algorithm_params_cpy["num_episodes"]},{total_steps_avg},{rewards_avg}\n')
         f.close()
+
+        # Last - save the policy network's parameters for future usage
+        torch.save(policy_net.state_dict(), f'{parameter_train_log_path}/policy_net_params.pth')
 
         ################
         # Step 2: Test #

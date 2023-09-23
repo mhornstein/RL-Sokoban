@@ -157,4 +157,4 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         a = q_values.max(1)[1].view(1, 1)
         return a.item()
 
-    return policy, done_count, episodes_steps, episodes_rewards, episodes_loss
+    return policy, policy_net, done_count, episodes_steps, episodes_rewards, episodes_loss
