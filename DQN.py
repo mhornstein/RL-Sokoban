@@ -108,6 +108,8 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
 
     for i in range(1, num_episodes+1):
         print("\nEpisode: ", i)
+        if not fixed_board:
+            env.change_board()
 
         done = False
         episode_reward = 0
