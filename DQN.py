@@ -4,6 +4,8 @@ import torch.nn as nn
 from torch.optim import SGD
 from collections import namedtuple, deque
 
+Transition = namedtuple('transition', ('state', 'action', 'reward', 'next_state'))
+
 class QNN(nn.Module):
     def __init__(self):
         super(QNN, self).__init__()
@@ -29,24 +31,22 @@ class QNN(nn.Module):
 class ExperienceReplayBuffer:
     def __init__(self, memory_buffer_size):
         self.buffer = deque([], maxlen=memory_buffer_size)
-        self.transition = namedtuple('transition', ('state', 'action', 'reward', 'next_state'))
-
     def push(self, state, action, reward, next_state):
-        transition = (state, action, reward, next_state)
-        self.buffer.append(transition)
+        t = (state, action, reward, next_state)
+        self.buffer.append(t)
 
     def sample(self, batch_size):
         batch = random.sample(self.buffer, batch_size)
-        return self.transition(*zip(*batch))
+        return Transition(*zip(*batch))
 
     def __len__(self):
         return len(self.buffer)
 
-
 def state_to_tensor(state, done=False):
     if done:
         return None
-    return torch.tensor(state, dtype=torch.float32).permute(2, 0, 1).unsqueeze(0)
+    else:
+        return torch.tensor(state, dtype=torch.float32).permute(2, 0, 1).unsqueeze(0)
 
 def pick_action(epsilon, state, env, policy_net):
     '''
@@ -65,7 +65,7 @@ def update_epsilon(epsilon, ep_decay):
     ep = max(epsilon * ep_decay, 0.05)
     return ep
 
-def train_policy_network(buffer, policy_net, target_net, batch_size, discount_factor, optimizer, criterion):
+def train_policy_network(buffer, policy_net, target_net, batch_size, gamma, optimizer, criterion):
     # Step 1: sample from data and create the required tensors
     batch = buffer.sample(batch_size)
     state_tensor = torch.cat(batch.state)
@@ -78,10 +78,10 @@ def train_policy_network(buffer, policy_net, target_net, batch_size, discount_fa
     q_values_tensor = policy_net(state_tensor).gather(1, action_tensor)
 
     # Step 3: Calculate the maximum Q-values for the next states using the target network
-    next_q_values = torch.zeros(batch_size)
+    next_q_values_tensor = torch.zeros(batch_size)
     with torch.no_grad():
-        next_q_values[non_final_state_mask_tensor] = target_net(next_state_tensor).max(1)[0]  # Note: final states remains with reward of 0
-    target_q_values = (next_q_values * discount_factor) + reward_tensor
+        next_q_values_tensor[non_final_state_mask_tensor] = target_net(next_state_tensor).max(1)[0]  # Note: final states remains with reward of 0
+    target_q_values = (next_q_values_tensor * gamma) + reward_tensor
 
     # Step 4: Calculate the loss and update the model accordingly
     loss = criterion(q_values_tensor, target_q_values.unsqueeze(1))
@@ -100,7 +100,7 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
     update_target_net(policy_net, target_net)
     criterion = torch.nn.MSELoss()
 
-    buffer= ExperienceReplayBuffer(memory_buffer_size)
+    buffer = ExperienceReplayBuffer(memory_buffer_size)
     optimizer = SGD(policy_net.parameters(), lr=learning_rate)
 
     done_count = 0
