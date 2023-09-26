@@ -3,27 +3,30 @@
 
 \title{Reinforcement Learning- Final Course Project}
 \author{Student name (ID. 123456789),Student name ID. 987654321)}
-\date{Submitted as final project report for the RL course, BIU, 2023}
+\date{Submitted as final project report for the RL course, BIU, 2024}
 
 \usepackage{natbib}
 \usepackage{graphicx}
+\usepackage{amsmath}
 
 \begin{document}
 
 \maketitle
 
 \section{Introduction}
-
-Provide some background for the project. give some overall motivation. Analyze the environment with RL terms
-
-\subsection{Related Works}
-Please provide some references to existing works, if you found any. it's an optional sub section, but can definitely help.
-
-
+This project presents the use of Reinforcement Learning to solve the Sokoban game, a complex puzzle involving the movement of boxes to designated storage locations. We use Deep Q Learning for this purpose. The report discusses game design within the context of Deep Q Learning, analyzes the impact of various hyperparameters on the achieved solutions, and presents successful experiments results.
 
 \section{Solution}
 \subsection{General approach}
-Describe your preferred approach to solve the problem. what alternatives you plan to try and why. 
+We focus on employing Deep Q Learning (DQN) to solve the Sokoban puzzle. DQN belongs to a category of artificial neural networks designed to approximate the optimal Q-value function within the framework of Reinforcement Learning. The Q-value function maps states to action values, indicating the expected reward obtained when taking a specific action in a given state. 
+
+The network is trained using a mix of supervised and reinforcement learning. It calculates the difference between predicted Q-values and actual rewards from the environment as its loss function. The DQN algorithm updates the network iteratively using batches of experiences from a replay buffer, following the Bellman equation:
+
+\begin{equation*}
+Q(s, a) = \sum_{s'} P(s' \,|\, s, a) \left[ R(s, a, s') + \gamma \max_{a'} Q(s', a') \right]
+\end{equation*}
+
+This equation calculates the reward for an action \(a\) in a given state \(s\). It considers the resulting state, \(s'\), the probability of reaching this state (\(P(s' | s, a)\)), the immediate reward obtained (\(R(s, a, s')\)), and the importance of future rewards (\(\gamma\)). The maximization step helps identify the best possible outcome from the subsequent situation.
 
 \subsection{Design}
 Provide some general information about your code, platform, how long it took you to train it, technical challenges you had, Loss functions, Optimizers, Architecture, and more.
