@@ -10,7 +10,7 @@ train_num_episodes = 100
 train_steps_cutoff = 500
 
 '''
-Evaluation-phase parameters
+Evaluation-phase parameters:
 test_num_episodes - the number of episodes for the evaluation
 test_steps_cutoff - maximal steps allowed per episode
 '''
@@ -18,19 +18,18 @@ test_num_episodes = 10
 test_steps_cutoff = 500
 
 '''
+Set to True to use the predefined board, and False to randomly generate a new game board
+'''
+fix_board = True
+
+'''
 Default hyper-parameters values (the tested hyperparameter will override its value in the relevant test)
 '''
-
 env_params = {'compliance': 1, 'num_boxes': 1}
 algorithm_params = {'learning_rate': 0.0001, 'gamma': 0.999, 'epsilon': 1, 'ep_decay': 0.999,
                     'num_episodes': train_num_episodes, 'steps_cutoff': train_steps_cutoff,
                     'batch_size': 32, 'target_freq_update': 10, 'memory_buffer_size': 10000,
                     'train_action_value_freq_update': 1}
-
-'''
-Set to True to use the predefined board, and False to randomly generate a new game board
-'''
-fix_board = True
 
 #######################################
 # Tested hyperparameter configuration #
