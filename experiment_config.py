@@ -1,6 +1,3 @@
-import random
-random.seed(2)
-
 #############################
 # Experiments configuration #
 #############################

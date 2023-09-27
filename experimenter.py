@@ -6,6 +6,7 @@ from experiment_config import *
 from reports_util import log_training_process, create_report
 import time
 import torch
+import random
 
 def escape(value):
     '''
@@ -32,7 +33,7 @@ def init_results_files(tested_parameter, result_path):
 
     return train_result_file, test_result_file
 
-def evaluate_policy(env, policy, fix_board, num_episodes, steps_cutoff):
+def evaluate_policy(env, policy, num_episodes, steps_cutoff):
     '''
     Tests the given policy on the given env episode_count times.
     :return: statistics of the conducted test: successful_finish_count, unsuccessful_finish_count, successful_finish_steps_avg, total_steps_avg
@@ -44,8 +45,6 @@ def evaluate_policy(env, policy, fix_board, num_episodes, steps_cutoff):
 
     for ep in range(1, num_episodes + 1):
         # print(f'start ep: {ep}. ', end='')
-        if not fix_board:
-            env.change_board()
         state = env.reset()
         done = False
         for t in range(1, steps_cutoff + 1):
@@ -117,7 +116,7 @@ def run_experiment(env, algorithm_params, tested_parameter, tested_values):
         # Step 2: Test #
         ################
         print('Start testing')
-        done_episodes_count, undone_episodes_count, done_episodes_avg_steps, total_steps_avg = evaluate_policy(env, policy, fix_board=algorithm_params_cpy['fixed_board'], num_episodes=test_num_episodes, steps_cutoff=test_steps_cutoff)
+        done_episodes_count, undone_episodes_count, done_episodes_avg_steps, total_steps_avg = evaluate_policy(env, policy, num_episodes=test_num_episodes, steps_cutoff=test_steps_cutoff)
 
         f = open(test_result_file, 'a')
         f.write(f'{esc_parameter_value},{done_episodes_count},{undone_episodes_count},{done_episodes_avg_steps},{total_steps_avg}\n')
