@@ -28,7 +28,12 @@ env_params = {'compliance': 1, 'num_boxes': 1}
 algorithm_params = {'learning_rate': 0.0001, 'gamma': 0.999, 'epsilon': 1, 'ep_decay': 0.999,
                     'num_episodes': train_num_episodes, 'steps_cutoff': train_steps_cutoff,
                     'batch_size': 32, 'target_freq_update': 10, 'memory_buffer_size': 10000,
-                    'fixed_board': True, 'train_action_value_freq_update': 1}
+                    'train_action_value_freq_update': 1}
+
+'''
+Set to True to use the predefined board, and False to randomly generate a new game board
+'''
+fix_board = True
 
 #######################################
 # Tested hyperparameter configuration #

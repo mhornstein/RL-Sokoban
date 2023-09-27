@@ -13,10 +13,10 @@ class QNN(nn.Module):
             torch.nn.Conv2d(3, 32, 5),
             torch.nn.MaxPool2d((2,2)),
             torch.nn.ReLU(),
-            torch.nn.Conv2d(32,64, 5),
+            torch.nn.Conv2d(32, 64, 5),
             torch.nn.MaxPool2d((2,2)),
             torch.nn.ReLU(),
-            torch.nn.Conv2d(64,128, 5),
+            torch.nn.Conv2d(64, 128, 5),
             torch.nn.MaxPool2d((2,2)),
             torch.nn.ReLU(),
             torch.nn.Flatten(),
@@ -93,7 +93,7 @@ def train_policy_network(buffer, policy_net, target_net, batch_size, gamma, opti
     return loss.item()
 
 def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
-        target_freq_update, memory_buffer_size, learning_rate, steps_cutoff, fixed_board, train_action_value_freq_update):
+        target_freq_update, memory_buffer_size, learning_rate, steps_cutoff, train_action_value_freq_update):
     policy_net = QNN()
     target_net = QNN()
     update_target_net(policy_net, target_net)
@@ -107,8 +107,6 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
 
     for i in range(1, num_episodes+1):
         print("\nEpisode: ", i)
-        if not fixed_board:
-            env.change_board()
 
         done = False
         episode_reward = 0

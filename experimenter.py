@@ -132,7 +132,9 @@ def run_experiment(env, algorithm_params, tested_parameter, tested_values):
 if __name__ == '__main__':
     start_time = time.time()
 
-    random.seed(2)  # keeping seed as in the assigment notebook
+    if fix_board: # keeping seed as in the assigment notebook
+        random.seed(2)
+
     env = EnvWrapper(**env_params)
 
     for tested_parameter, tested_values in tested_parameters.items():

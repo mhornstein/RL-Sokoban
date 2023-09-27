@@ -61,7 +61,7 @@ class EnvWrapper(gym.Env):
         rgb_display = self.env.get_image(mode='rgb_array')
         return rgb_display
 
-    def render(self, mode='tiny_rgb_array'):
+    def render(self, mode='rgb_array'):
         plt.imshow(self.env.render(mode))
 
     def sample_action(self):
