@@ -79,7 +79,7 @@ def run_experiment(env, algorithm_params, tested_parameter, tested_values):
 
     # Running test for parameter_value
     for parameter_value in tested_values:
-        print(f'testing param: {tested_parameter}={parameter_value}')
+        print(f'Testing param: {tested_parameter}={parameter_value}')
         start_time = time.time()
 
         esc_parameter_value = escape(parameter_value)
@@ -126,7 +126,7 @@ def run_experiment(env, algorithm_params, tested_parameter, tested_values):
 
         end_time = time.time()
         execution_time = end_time - start_time
-        print(f'Time to run: {execution_time} seconds.\n')
+        print(f'Done. Total time to run for testing param: {execution_time} seconds.\n')
 
 if __name__ == '__main__':
     start_time = time.time()
@@ -137,7 +137,7 @@ if __name__ == '__main__':
     env = EnvWrapper(**env_params)
 
     for tested_parameter, tested_values in tested_parameters.items():
-        print(f'Testing: {tested_parameter}. values: {tested_values}')
+        print(f'Testing: {tested_parameter}. values: {tested_values}\n')
         run_experiment(env, algorithm_params, tested_parameter, tested_values)
 
     end_time = time.time()
