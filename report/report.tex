@@ -62,12 +62,43 @@ To assess the performance of our DQN-based Sokoban solver, we use the following 
 \end{itemize}
 
 We measured the metrics during both the training time (for the 500 training episodes) and the testing time (using 10 puzzle samples).
+
+\subsection{Exploring Hyperparameters}
 In order to facilitate the exploration of hyperparameters, we will maintain a consistent configuration and systematically vary a single hyperparameter at a time to scrutinize its impact.
 
-\section{Discussion}
-Provide some final words and summarize what you have found from running the experiments you described above. Provide some high level insights.
+Given that the fixed scenario with one box offers the simplest option, we will use it to investigate the optimal parameters for the DQN algorithm.
 
-Note - your project will be evaluated for aspects, including the technique you selected, the rational of the experiments you decided to run, the insights you learned from this process and more. Remember, for the purpose of this course, the process that you demonstrate is very  important.
+\subsubsection{Learning Rate}
+TODO
+
+\subsubsection{Batch Size}
+TODO
+
+\subsubsection{Frequency of Network Training}
+TODO
+
+\subsubsection{Frequency of Target Network Updates}
+TODO
+
+\subsubsection{Size of the Experience Replay Buffer}
+TODO
+
+\subsubsection{Discount Factor (Gamma)}
+TODO
+
+\subsubsection{Epsilon and Epsilon Decay}
+
+\subsection{Exploring The Alternative Scenarios}
+TODO
+
+\subsubsection{Random scenario - One Box}
+TODO
+
+\subsubsection{Random scenario - Two Boxes}
+TODO
+
+\section{Discussion}
+The purpose of this project was to apply the Deep Q Learning algorithm to solve the Sokoban game. During implementation, we encountered two key challenges. First, creating a suitable reward function proved to be challenging, and we had to experiment with various options. Second, selecting the correct hyperparameters, including the discount factor, learning rate, and exploration rate, played a vital role in the algorithm's performance. Our extensive experimentation led to the identification of hyperparameter values for successfully solving Sokoban. In conclusion, our experiments validate the effectiveness of the Deep Q Learning algorithm in overcoming the challenges posed by Sokoban.
 
 \section{Code}
 
