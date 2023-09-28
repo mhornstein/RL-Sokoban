@@ -2,6 +2,7 @@ import gym
 import matplotlib.pyplot as plt
 import numpy as np
 import copy
+import random
 
 class EnvWrapper(gym.Env):
     '''
