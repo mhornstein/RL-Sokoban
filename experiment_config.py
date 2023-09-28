@@ -2,32 +2,26 @@
 # Experiments configuration #
 #############################
 '''
-Training-phase parameters:
-train_num_episodes - the number of episodes for the training
-train_steps_cutoff - maximal steps allowed per episode
+Training-phase and testing-phase parameters
 '''
-train_num_episodes = 100
-train_steps_cutoff = 500
+train_num_episodes = 100 # the number of episodes for the training
+test_num_episodes = 10 # the number of episodes for the evaluation
+steps_cutoff = 500 # maximal steps allowed per episode
 
 '''
-Evaluation-phase parameters:
-test_num_episodes - the number of episodes for the evaluation
-test_steps_cutoff - maximal steps allowed per episode
+Environment hyperparameters for sokoban environment
 '''
-test_num_episodes = 10
-test_steps_cutoff = 500
-
-'''
-Set to True to use the predefined board, and False to randomly generate a new game board
-'''
-fix_board = True
+fix_board = True # Set to True to use the predefined board, and False to randomly generate a new game board
+compliance = 1 # when the agent takes a certain action, this is the probability that the environment will comply
+num_boxes = 1 # number of boxes in the sokoban puzzle
+dim_room = (7, 7) # width and length of sokoban puzzle
+use_distance_reward = True # set to True to use distance-based reward. Set to False to use the default sokoban setting
 
 '''
 Default hyper-parameters values (the tested hyperparameter will override its value in the relevant test)
 '''
-env_params = {'compliance': 1, 'num_boxes': 1}
 algorithm_params = {'learning_rate': 0.0001, 'gamma': 0.999, 'epsilon': 1, 'ep_decay': 0.999,
-                    'num_episodes': train_num_episodes, 'steps_cutoff': train_steps_cutoff,
+                    'num_episodes': train_num_episodes, 'steps_cutoff': steps_cutoff,
                     'batch_size': 32, 'target_freq_update': 10, 'memory_buffer_size': 10000,
                     'train_action_value_freq_update': 1}
 

@@ -7,6 +7,7 @@ from reports_util import log_training_process, create_report
 import time
 import torch
 import random
+from soko_pap import PushAndPullSokobanEnv
 
 def escape(value):
     '''
@@ -97,7 +98,7 @@ def run_experiment(env, algorithm_params, tested_parameter, tested_values):
         # Step 1: Train #
         #################
         print("Start training")
-        policy, policy_net, done_count, episodes_steps, episodes_rewards, episodes_loss = dqn(**algorithm_params_cpy)
+        mid_train_policy, policy, policy_net, done_count, episodes_steps, episodes_rewards, episodes_loss = dqn(**algorithm_params_cpy)
 
         # First - log training process
         log_training_process(parameter_train_log_path, episodes_loss, episodes_steps, episodes_rewards)
@@ -116,7 +117,7 @@ def run_experiment(env, algorithm_params, tested_parameter, tested_values):
         # Step 2: Test #
         ################
         print('Start testing')
-        done_episodes_count, undone_episodes_count, done_episodes_avg_steps, total_steps_avg = evaluate_policy(env, policy, num_episodes=test_num_episodes, steps_cutoff=test_steps_cutoff)
+        done_episodes_count, undone_episodes_count, done_episodes_avg_steps, total_steps_avg = evaluate_policy(env, policy, num_episodes=test_num_episodes, steps_cutoff=steps_cutoff)
 
         f = open(test_result_file, 'a')
         f.write(f'{esc_parameter_value},{done_episodes_count},{undone_episodes_count},{done_episodes_avg_steps},{total_steps_avg}\n')
@@ -134,7 +135,9 @@ if __name__ == '__main__':
     if fix_board: # keeping seed as in the assigment notebook
         random.seed(2)
 
-    env = EnvWrapper(**env_params)
+    sok = PushAndPullSokobanEnv(dim_room=dim_room, num_boxes=num_boxes ,max_steps=steps_cutoff)
+
+    env = EnvWrapper(sok=sok, compliance=compliance, use_distance_reward=use_distance_reward)
 
     for tested_parameter, tested_values in tested_parameters.items():
         print(f'Testing: {tested_parameter}. values: {tested_values}\n')

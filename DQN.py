@@ -48,6 +48,22 @@ def state_to_tensor(state, done=False):
     else:
         return torch.tensor(state, dtype=torch.float32).permute(2, 0, 1).unsqueeze(0)
 
+def create_policy(policy_net):
+    policy_net_snapshot = QNN()
+    policy_net_snapshot.load_state_dict(policy_net.state_dict())
+    def policy(s):
+        '''
+        This function gets a state and returns the preferable action.
+        It does it by providing the state to the network and returning the action with maximal q-value
+        (i.e. this is a greedy policy_net)
+        '''
+        state_tensor = state_to_tensor(s)
+        with torch.no_grad():
+            q_values = policy_net(state_tensor)
+        a = q_values.max(1)[1].view(1, 1)
+        return a.item()
+    return policy
+
 def pick_action(epsilon, state, env, policy_net):
     '''
     Selects an action based on the epsilon-greedy strategy, which balances exploration and exploitation.
@@ -143,18 +159,11 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
         if done:
             done_count += 1
 
+        if num_episodes // 2 == i:
+            mid_train_policy = create_policy(policy_net)
+
         print()
 
-    def policy(s):
-        '''
-        This function gets a state and returns the preferable action.
-        It does it by providing the state to the network and returning the action with maximal q-value
-        (i.e. this is a greedy policy_net)
-        '''
-        state_tensor = state_to_tensor(s)
-        with torch.no_grad():
-            q_values = policy_net(state_tensor)
-        a = q_values.max(1)[1].view(1, 1)
-        return a.item()
+    policy = create_policy(policy_net)
 
-    return policy, policy_net, done_count, episodes_steps, episodes_rewards, episodes_loss
+    return mid_train_policy, policy, policy_net, done_count, episodes_steps, episodes_rewards, episodes_loss

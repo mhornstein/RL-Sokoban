@@ -1,14 +1,11 @@
 import gym
 import matplotlib.pyplot as plt
-import random
 import numpy as np
-from soko_pap import PushAndPullSokobanEnv
 import copy
 
 class EnvWrapper(gym.Env):
     '''
-    This wrapper enables environment customization:
-    * simulating stochastic environment.
+    This wrapper enables environment customization (e.g. simulating stochastic environment).
 
     The implementation is based on the notebook:
     https://colab.research.google.com/drive/1ohrs6k0m17tPoQehdInUwwdj0g3H0vra?usp=sharing#scrollTo=XXqIDAd1SeMX
@@ -16,15 +13,16 @@ class EnvWrapper(gym.Env):
     but makes use of the Sokoban env instead.
     '''
 
-    def __init__(self, num_boxes=1, compliance=0.9):
+    def __init__(self, sok, compliance=1, use_distance_reward=True):
         '''
-        :param num_boxes: number of boxes in the sokoban env
-        :param compliance: when the agent takes a certain action, this is the probability that the environment will
+        :param sok: the sokoban env
+        :param compliance: when the agent takes a certain action, this is the probability that the environment will comply.
+        :param use_distance_reward: set to True to use distance-based reward. Set to False to use the default sokoban setting
         '''
-        self.num_boxes = num_boxes
         self.compliance = compliance
+        self.use_distance_reward = use_distance_reward
 
-        self.source_env = PushAndPullSokobanEnv(dim_room=(7, 7), num_boxes=num_boxes, max_steps=10000) # todo UPDATE
+        self.source_env = sok
         self.reset()
 
         # creating stochactic transition mapping
@@ -37,14 +35,13 @@ class EnvWrapper(gym.Env):
             dist[action] = compliance
             self.action_dist[action] = dist
 
-        self.render()
-
     def step(self, action):
         dist = self.action_dist[action]
         chosen_action = random.choices(self.action_list, dist)[0]
 
         state, reward, done, info = self.env.step(chosen_action)
-        reward += self.calc_reward()
+        if self.use_distance_reward:
+            reward += self.calc_reward()
         state = self.get_current_state()
 
         return state, reward, done, info
@@ -96,34 +93,3 @@ class EnvWrapper(gym.Env):
                 reward -= dist
 
         return float(reward)
-
-    def __str__(self):
-        return f'<num of boxes: {self.num_boxes}, compliance: {self.compliance}>'
-
-# for testing
-if __name__ == '__main__': # TODO finish here
-    from soko_pap import PushAndPullSokobanEnv
-    import random
-
-    random.seed(2)
-
-    env = EnvWrapper(num_boxes=1, compliance=1)
-    env.render()
-
-    action = 8 # Move right
-    state, reward, done, info = env.step(action)
-    # print(state, reward, done, info)
-    env.render()
-
-    action = env.sample_action()
-    state, reward, done, info = env.step(action)
-    # print(state, reward, done, info)
-    env.render()
-    env.reset()
-    env.render()
-
-    env.change_board()
-    env.render()
-
-    input()
-
