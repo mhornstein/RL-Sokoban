@@ -41,9 +41,18 @@ class EnvWrapper(gym.Env):
         chosen_action = random.choices(self.action_list, dist)[0]
 
         state, reward, done, info = self.env.step(chosen_action)
-        if self.use_distance_reward:
-            reward += self.calc_reward()
+
+        box_target_distance = self.calc_box_target_distance()
+
+        # override state with rgb representation
         state = self.get_current_state()
+
+        # override reward with target distance metric if required
+        if self.use_distance_reward:
+            reward -= box_target_distance
+
+        #  # override done to be True iff all targets in place (and not also in case steps reached maximum limit as employed by the sokoban env)
+        done = True if box_target_distance == 0 else False
 
         return state, reward, done, info
 
@@ -72,7 +81,7 @@ class EnvWrapper(gym.Env):
     def action_space(self):
         return self.env.action_space
 
-    def calc_reward(self):
+    def calc_box_target_distance(self):
         '''
         Calculate the Manhattan distance between the positions of boxes (4) in room_state
         and their corresponding target positions (2) in room_fixed.
@@ -91,6 +100,6 @@ class EnvWrapper(gym.Env):
         for i in range(len(box_x)):
             for j in range(len(box_target_x)):
                 dist = abs(box_x[i] - box_target_x[j]) + abs(box_y[i] - box_target_y[j])
-                reward -= dist
+                reward += dist
 
         return float(reward)

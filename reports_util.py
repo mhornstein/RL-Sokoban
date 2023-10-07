@@ -24,6 +24,8 @@ def save_lineplot(data, path, title, xlabel, ylabel):
     plt.close()
 
 def log_training_process(log_dir, episodes_loss, episodes_steps, episodes_rewards):
+
+    # First - save the lineplot
     plt.clf()
     save_lineplot(data=episodes_loss, path=f'{log_dir}/Convergence_Graph__Episodes_loss.png',
                   title='Convergence Graph: Episodes Loss', xlabel='Episode number', ylabel='Loss')
@@ -31,6 +33,16 @@ def log_training_process(log_dir, episodes_loss, episodes_steps, episodes_reward
                   title='Convergence Graph: Episodes steps', xlabel='Episode number', ylabel='Steps')
     save_lineplot(data=episodes_rewards, path=f'{log_dir}/Convergence_Graph__Episodes_reward.png',
                   title='Convergence Graph: Episodes reward', xlabel='Episode number', ylabel='Reward')
+
+    # Then - save the raw data
+    raw_data = {
+        'episode': list(range(1, len(episodes_loss) + 1)),
+        'loss': episodes_loss,
+        'steps': episodes_steps,
+        'rewards': episodes_rewards
+    }
+    df = pd.DataFrame(raw_data)
+    df.to_csv(f'{log_dir}/Convergence_logs.csv', index=False)
 
 #########################
 ## full report generation
