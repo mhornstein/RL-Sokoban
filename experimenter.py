@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
     sok = PushAndPullSokobanEnv(dim_room=dim_room, num_boxes=num_boxes ,max_steps=steps_cutoff)
 
-    env = EnvWrapper(sok=sok, compliance=compliance, use_distance_reward=use_distance_reward)
+    env = EnvWrapper(sok=sok, use_distance_reward=use_distance_reward)
 
     for tested_parameter, tested_values in tested_parameters.items():
         print(f'Testing: {tested_parameter}. values: {tested_values}\n')

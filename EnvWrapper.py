@@ -2,11 +2,10 @@ import gym
 import matplotlib.pyplot as plt
 import numpy as np
 import copy
-import random
 
 class EnvWrapper(gym.Env):
     '''
-    This wrapper enables environment customization (e.g. simulating stochastic environment).
+    This wrapper enables environment customization.
 
     The implementation is based on the notebook:
     https://colab.research.google.com/drive/1ohrs6k0m17tPoQehdInUwwdj0g3H0vra?usp=sharing#scrollTo=XXqIDAd1SeMX
@@ -14,33 +13,17 @@ class EnvWrapper(gym.Env):
     but makes use of the Sokoban env instead.
     '''
 
-    def __init__(self, sok, compliance=1, use_distance_reward=True):
+    def __init__(self, sok, use_distance_reward=True):
         '''
         :param sok: the sokoban env
-        :param compliance: when the agent takes a certain action, this is the probability that the environment will comply.
         :param use_distance_reward: set to True to use distance-based reward. Set to False to use the default sokoban setting
         '''
-        self.compliance = compliance
-        self.use_distance_reward = use_distance_reward
-
         self.source_env = sok
+        self.use_distance_reward = use_distance_reward
         self.reset()
 
-        # creating stochactic transition mapping
-        n = self.env.action_space.n
-        self.action_list = list(range(n))
-
-        self.action_dist = {}
-        for action in self.action_list:
-            dist = [(1 - compliance) / (n - 1) for i in range(n)]
-            dist[action] = compliance
-            self.action_dist[action] = dist
-
     def step(self, action):
-        dist = self.action_dist[action]
-        chosen_action = random.choices(self.action_list, dist)[0]
-
-        state, reward, done, info = self.env.step(chosen_action)
+        state, reward, done, info = self.env.step(action)
 
         box_target_distance = self.calc_box_target_distance()
 
@@ -51,7 +34,7 @@ class EnvWrapper(gym.Env):
         if self.use_distance_reward:
             reward -= box_target_distance
 
-        #  # override done to be True iff all targets in place (and not also in case steps reached maximum limit as employed by the sokoban env)
+        # override done to be True iff all targets in place (and not also in case steps reached maximum limit as employed by the sokoban env)
         done = True if box_target_distance == 0 else False
 
         return state, reward, done, info
