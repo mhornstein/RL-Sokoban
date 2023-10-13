@@ -12,7 +12,6 @@ steps_cutoff = 500 # maximal steps allowed per episode
 Environment hyperparameters for sokoban environment
 '''
 fix_board = True # Set to True to use the predefined board, and False to randomly generate a new game board
-compliance = 1 # when the agent takes a certain action, this is the probability that the environment will comply
 num_boxes = 1 # number of boxes in the sokoban puzzle
 dim_room = (7, 7) # width and length of sokoban puzzle
 use_distance_reward = True # set to True to use distance-based reward. Set to False to use the default sokoban setting
