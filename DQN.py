@@ -59,7 +59,7 @@ def create_policy(policy_net):
         '''
         state_tensor = state_to_tensor(s)
         with torch.no_grad():
-            q_values = policy_net(state_tensor)
+            q_values = policy_net_snapshot(state_tensor)
         a = q_values.max(1)[1].view(1, 1)
         return a.item()
     return policy
