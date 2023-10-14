@@ -1,4 +1,4 @@
-# Solving Sokoban with Deep Q Learning
+# Solving Sokoban with Deep Q Learning Notebook
 
 This notebook presents the use of Reinforcement Learning to solve the Sokoban game, a complex puzzle involving the movement of boxes to target locations. It uses Deep Q Learning (DQN) for this purpose.
 
