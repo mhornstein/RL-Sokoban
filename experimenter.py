@@ -24,7 +24,7 @@ def init_results_files(tested_parameter, result_path):
     # Test and train stats csv files
     test_result_file = f'{result_path}/test_result_{tested_parameter}.csv'
     f = open(test_result_file, 'w')
-    f.write(f'{tested_parameter},done_episodes_count,undone_episodes_count,done_episodes_avg_steps,total_steps_avg\n')
+    f.write(f'{tested_parameter},steps_count,solved\n')
     f.close()
 
     train_result_file = f'{result_path}/train_result_{tested_parameter}.csv'
@@ -34,39 +34,24 @@ def init_results_files(tested_parameter, result_path):
 
     return train_result_file, test_result_file
 
-def evaluate_policy(env, policy, num_episodes, steps_cutoff):
+def evaluate_policy(env, policy, steps_cutoff):
     '''
-    Tests the given policy on the given env episode_count times.
-    :return: statistics of the conducted test: successful_finish_count, unsuccessful_finish_count, successful_finish_steps_avg, total_steps_avg
+    Evaluates a given policy on the given env for a limited steps_cutoff number of steps or until the environment is solved.
+    :return: A tuple containing two values:
+        - steps_count: The number of steps taken during the evaluation, capped at steps_cutoff.
+        - done: A boolean indicating whether the environment was solved during the evaluation.
+    :rtype: tuple
     '''
-    successful_finish_count = 0
-    successful_finish_steps = []
-    unsuccessful_finish_count = 0
-    total_steps = []
+    state = env.reset()
+    done = False
+    steps_count = 0
 
-    for ep in range(1, num_episodes + 1):
-        # print(f'start ep: {ep}. ', end='')
-        state = env.reset()
-        done = False
-        for t in range(1, steps_cutoff + 1):
-            env.render()
-            action = policy(state)
-            state, reward, done, info = env.step(action)
-            if done:
-                # print(f'episode finished successfully after {t} timesteps')
-                successful_finish_count += 1
-                successful_finish_steps.append(t)
-                break
-        if not done:
-            # print(f'episode finished due to timeout')
-            unsuccessful_finish_count += 1
+    while not done and steps_count < steps_cutoff:
+        action = policy(state)
+        state, reward, done, info = env.step(action)
+        steps_count += 1
 
-        total_steps.append(t)
-
-    successful_finish_steps_avg = 0 if len(successful_finish_steps) == 0 else np.mean(successful_finish_steps)
-    total_steps_avg = np.mean(total_steps)
-
-    return successful_finish_count, unsuccessful_finish_count, successful_finish_steps_avg, total_steps_avg
+    return steps_count, done
 
 def run_experiment(env, algorithm_params, tested_parameter, tested_values):
     algorithm_params_cpy = algorithm_params.copy()
@@ -117,13 +102,13 @@ def run_experiment(env, algorithm_params, tested_parameter, tested_values):
         # Step 2: Test #
         ################
         print('Start testing')
-        done_episodes_count, undone_episodes_count, done_episodes_avg_steps, total_steps_avg = evaluate_policy(env, policy, num_episodes=test_num_episodes, steps_cutoff=steps_cutoff)
+        steps_count, done = evaluate_policy(env, policy, steps_cutoff=steps_cutoff)
 
         f = open(test_result_file, 'a')
-        f.write(f'{esc_parameter_value},{done_episodes_count},{undone_episodes_count},{done_episodes_avg_steps},{total_steps_avg}\n')
+        f.write(f'{esc_parameter_value},{steps_count},{done}\n')
         f.close()
 
-        create_report(result_path, tested_parameter, train_result_file, test_result_file)
+        # create_report(result_path, tested_parameter, train_result_file, test_result_file)
 
         end_time = time.time()
         execution_time = end_time - start_time

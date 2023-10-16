@@ -5,7 +5,6 @@
 Training-phase and testing-phase parameters
 '''
 train_num_episodes = 100 # the number of episodes for the training
-test_num_episodes = 10 # the number of episodes for the evaluation
 steps_cutoff = 500 # maximal steps allowed per episode
 
 '''
