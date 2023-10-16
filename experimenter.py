@@ -24,7 +24,7 @@ def init_results_files(tested_parameter, result_path):
     # Test and train stats csv files
     test_result_file = f'{result_path}/test_result_{tested_parameter}.csv'
     f = open(test_result_file, 'w')
-    f.write(f'{tested_parameter},steps_count,solved\n')
+    f.write(f'{tested_parameter},solved,steps_count\n')
     f.close()
 
     train_result_file = f'{result_path}/train_result_{tested_parameter}.csv'
@@ -105,10 +105,10 @@ def run_experiment(env, algorithm_params, tested_parameter, tested_values):
         steps_count, done = evaluate_policy(env, policy, steps_cutoff=steps_cutoff)
 
         f = open(test_result_file, 'a')
-        f.write(f'{esc_parameter_value},{steps_count},{done}\n')
+        f.write(f'{esc_parameter_value},{done},{steps_count}\n')
         f.close()
 
-        # create_report(result_path, tested_parameter, train_result_file, test_result_file)
+        create_report(result_path, tested_parameter, train_result_file, test_result_file)
 
         end_time = time.time()
         execution_time = end_time - start_time

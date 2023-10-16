@@ -52,6 +52,19 @@ def create_header(subplot, header):
     subplot.set_yticks([])
     subplot.spines.clear()
 
+def create_table(subplot, header, df):
+    table_data = [df.columns] + df.values.tolist()
+
+    table = subplot.table(cellText=table_data, cellLoc='center', loc='center')
+    table.auto_set_font_size(False)
+    table.set_fontsize(12)
+    table.scale(1, 1.5)
+
+    subplot.set_title(header)
+    subplot.set_xticks([])
+    subplot.set_yticks([])
+    subplot.spines.clear()
+
 def plot_mean_steps(df, tested_parameter, ax):
     df = df[[tested_parameter, 'total_steps_avg']]
     sns.barplot(data=df, x=tested_parameter, y='total_steps_avg', palette=palette, ax=ax)
@@ -62,11 +75,11 @@ def plot_done_episodes_count(df, tested_parameter, total_episodes_count, ax):
     df = df[[tested_parameter, 'done_episodes_count']]
     sns.barplot(data=df, x=tested_parameter, y='done_episodes_count', palette=palette, ax=ax)
     ax.set(xlabel=ax.get_xlabel().replace('_', ' '))
-    ax.set(ylabel=f"avg {ax.get_ylabel().replace('_', ' ')} [in {total_episodes_count} episodes]")
+    ax.set(ylabel=f"avg {ax.get_ylabel().replace('_', ' ')}\n[in {total_episodes_count} episodes]")
 
 def create_report(plot_path, tested_parameter, train_result_file, test_result_file):
     fig = plt.figure(figsize=(12, 10))
-    gs = GridSpec(6, 2, height_ratios=[0.05, 0.05, 1, 0.1, 0.05, 1], hspace=0.4, wspace=0.4)
+    gs = GridSpec(5, 2, height_ratios=[0.05, 0.05, 1, 0.1, 1], hspace=0.4, wspace=0.4)
 
     # add headers
     parameter_header_subplot = fig.add_subplot(gs[0, :])
@@ -74,9 +87,6 @@ def create_report(plot_path, tested_parameter, train_result_file, test_result_fi
 
     train_header_subplot = fig.add_subplot(gs[1, :])
     create_header(train_header_subplot, 'train results')
-
-    test_header_subplot = fig.add_subplot(gs[4, :])
-    create_header(test_header_subplot, 'test results')
 
     # add train graphs
     df = pd.read_csv(train_result_file)
@@ -88,15 +98,10 @@ def create_report(plot_path, tested_parameter, train_result_file, test_result_fi
     total_episodes_count = df['total_episodes_count'].iloc[0]
     plot_done_episodes_count(df, tested_parameter, total_episodes_count, ax)
 
-    # add test graphs
+    # add evaluation results
     df = pd.read_csv(test_result_file)
-
-    ax = fig.add_subplot(gs[5, 0])
-    plot_mean_steps(df, tested_parameter, ax)
-
-    ax = fig.add_subplot(gs[5, 1])
-    total_episodes_count = df.iloc[0].done_episodes_count + df.iloc[0].undone_episodes_count
-    plot_done_episodes_count(df, tested_parameter, total_episodes_count, ax)
+    policy_evaluation_subplot = fig.add_subplot(gs[4, :])
+    create_table(policy_evaluation_subplot, 'Policy Evaluation results', df)
 
     plt.savefig(f'{plot_path}/results_plot.png')
     plt.close()
