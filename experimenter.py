@@ -108,7 +108,7 @@ def run_experiment(env, algorithm_params, tested_parameter, tested_values):
         f.write(f'{esc_parameter_value},{done},{steps_count}\n')
         f.close()
 
-        create_report(result_path, tested_parameter, train_result_file, test_result_file)
+        create_report(result_path, tested_parameter, train_result_file, test_result_file, train_log_path)
 
         end_time = time.time()
         execution_time = end_time - start_time

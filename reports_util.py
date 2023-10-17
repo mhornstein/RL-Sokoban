@@ -77,9 +77,22 @@ def plot_done_episodes_count(df, tested_parameter, total_episodes_count, ax):
     ax.set(xlabel=ax.get_xlabel().replace('_', ' '))
     ax.set(ylabel=f"avg {ax.get_ylabel().replace('_', ' ')}\n[in {total_episodes_count} episodes]")
 
-def create_report(plot_path, tested_parameter, train_result_file, test_result_file):
+def plot_train_metric(train_log_path, metric, ax):
+    # First - load train logs
+    res_df = pd.DataFrame()
+    for dir_name in os.listdir(train_log_path):
+        value_header = dir_name.split('_')[-1]
+        dir_path = os.path.join(train_log_path, dir_name)
+        log_file_path = os.path.join(dir_path, "Convergence_logs.csv")
+        df = pd.read_csv(log_file_path).set_index('episode')
+        res_df[value_header] = df[metric]
+    # Then - plot
+    ax.set_title(metric)
+    sns.lineplot(data=res_df, palette=palette, ax=ax, dashes=False)
+
+def create_report(plot_path, tested_parameter, train_result_file, test_result_file, train_log_path):
     fig = plt.figure(figsize=(12, 10))
-    gs = GridSpec(5, 2, height_ratios=[0.05, 0.05, 1, 0.1, 1], hspace=0.4, wspace=0.4)
+    gs = GridSpec(8, 6, height_ratios=[0.05, 0.05, 1, 0.1, 1, 0.1, 0.05, 1], hspace=0.4, wspace=0.4)
 
     # add headers
     parameter_header_subplot = fig.add_subplot(gs[0, :])
@@ -88,13 +101,16 @@ def create_report(plot_path, tested_parameter, train_result_file, test_result_fi
     train_header_subplot = fig.add_subplot(gs[1, :])
     create_header(train_header_subplot, 'train results')
 
+    train_header_subplot = fig.add_subplot(gs[6, :])
+    create_header(train_header_subplot, 'train graphs')
+
     # add train graphs
     df = pd.read_csv(train_result_file)
 
-    ax = fig.add_subplot(gs[2, 0])
+    ax = fig.add_subplot(gs[2, 0:3])
     plot_mean_steps(df, tested_parameter, ax)
 
-    ax = fig.add_subplot(gs[2, 1])
+    ax = fig.add_subplot(gs[2, 4:])
     total_episodes_count = df['total_episodes_count'].iloc[0]
     plot_done_episodes_count(df, tested_parameter, total_episodes_count, ax)
 
@@ -103,14 +119,21 @@ def create_report(plot_path, tested_parameter, train_result_file, test_result_fi
     policy_evaluation_subplot = fig.add_subplot(gs[4, :])
     create_table(policy_evaluation_subplot, 'Policy Evaluation results', df)
 
+    # Add steps, reward and loss graphs
+    plot_train_metric(train_log_path, 'loss', ax=fig.add_subplot(gs[7, 0:2]))
+    plot_train_metric(train_log_path, 'steps', ax=fig.add_subplot(gs[7, 2:4]))
+    plot_train_metric(train_log_path, 'rewards', ax=fig.add_subplot(gs[7, 4:]))
+
     plt.savefig(f'{plot_path}/results_plot.png')
     plt.close()
     plt.clf()
 
 if __name__ == '__main__':
-    tested_param = 'fixed_board'
+    tested_param = 'learning_rate'
     # tested_param = 'layers_sizes'
     #tested_param = 'compliance'
-    train_results_path = f'./results_{tested_param}/train_result_{tested_param}.csv'
-    test_results_path = f'./results_{tested_param}/test_result_{tested_param}.csv'
-    create_report(f'./results_{tested_param}', tested_param, train_results_path, test_results_path)
+    result_path = f'results_{tested_param}'
+    train_results_path = f'./{result_path}/train_result_{tested_param}.csv'
+    test_results_path = f'./{result_path}/test_result_{tested_param}.csv'
+    train_log_path = f'{result_path}/train_log'
+    create_report(f'./results_{tested_param}', tested_param, train_results_path, test_results_path, train_log_path)
