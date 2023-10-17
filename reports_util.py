@@ -52,6 +52,7 @@ def create_header(subplot, header):
     subplot.spines.clear()
 
 def create_table(subplot, header, df):
+    df.columns = df.columns.str.replace('_', ' ')
     table_data = [df.columns] + df.values.tolist()
 
     table = subplot.table(cellText=table_data, cellLoc='center', loc='center')
