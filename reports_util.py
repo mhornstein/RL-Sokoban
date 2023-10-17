@@ -92,37 +92,41 @@ def plot_train_metric(train_log_path, metric, ax):
 
 def create_report(plot_path, tested_parameter, train_result_file, test_result_file, train_log_path):
     fig = plt.figure(figsize=(12, 10))
-    gs = GridSpec(8, 6, height_ratios=[0.05, 0.05, 1, 0.1, 1, 0.1, 0.05, 1], hspace=0.4, wspace=0.4)
+    gs = GridSpec(7, 6, height_ratios=[0.05,
+                                       1,
+                                       0.05, 1,
+                                       0.1,
+                                       0.05, 1], hspace=0.4, wspace=0.4)
 
     # add headers
     parameter_header_subplot = fig.add_subplot(gs[0, :])
     create_header(parameter_header_subplot, tested_parameter.replace('_', ' '))
 
-    train_header_subplot = fig.add_subplot(gs[1, :])
+    train_header_subplot = fig.add_subplot(gs[2, :])
     create_header(train_header_subplot, 'train results')
 
-    train_header_subplot = fig.add_subplot(gs[6, :])
+    train_header_subplot = fig.add_subplot(gs[5, :])
     create_header(train_header_subplot, 'train graphs')
-
-    # add train graphs
-    df = pd.read_csv(train_result_file)
-
-    ax = fig.add_subplot(gs[2, 0:3])
-    plot_mean_steps(df, tested_parameter, ax)
-
-    ax = fig.add_subplot(gs[2, 4:])
-    total_episodes_count = df['total_episodes_count'].iloc[0]
-    plot_done_episodes_count(df, tested_parameter, total_episodes_count, ax)
 
     # add evaluation results
     df = pd.read_csv(test_result_file)
-    policy_evaluation_subplot = fig.add_subplot(gs[4, :])
+    policy_evaluation_subplot = fig.add_subplot(gs[1, :])
     create_table(policy_evaluation_subplot, 'Policy Evaluation results', df)
 
+    # add train results
+    df = pd.read_csv(train_result_file)
+
+    ax = fig.add_subplot(gs[3, 0:3])
+    plot_mean_steps(df, tested_parameter, ax)
+
+    ax = fig.add_subplot(gs[3, 4:])
+    total_episodes_count = df['total_episodes_count'].iloc[0]
+    plot_done_episodes_count(df, tested_parameter, total_episodes_count, ax)
+
     # Add steps, reward and loss graphs
-    plot_train_metric(train_log_path, 'loss', ax=fig.add_subplot(gs[7, 0:2]))
-    plot_train_metric(train_log_path, 'steps', ax=fig.add_subplot(gs[7, 2:4]))
-    plot_train_metric(train_log_path, 'rewards', ax=fig.add_subplot(gs[7, 4:]))
+    plot_train_metric(train_log_path, 'loss', ax=fig.add_subplot(gs[6, 0:2]))
+    plot_train_metric(train_log_path, 'steps', ax=fig.add_subplot(gs[6, 2:4]))
+    plot_train_metric(train_log_path, 'rewards', ax=fig.add_subplot(gs[6, 4:]))
 
     plt.savefig(f'{plot_path}/results_plot.png')
     plt.close()
