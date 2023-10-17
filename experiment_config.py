@@ -31,10 +31,10 @@ remove dictionary keys to test less hyperparameters
 Change the values in the entries to test different hyper-parameters values
 '''
 tested_parameters = {
-                     'learning_rate': [0.0001, 0.0005, 0.001, 0.005],
+                     'learning_rate': [0.00005, 0.0001, 0.0005, 0.001],
                      'batch_size': [16, 32, 64, 128, 256],
-                     'target_freq_update': [4, 10, 16, 32],
-                     'memory_buffer_size': [100, 1000, 10000, 100000],
+                     'target_freq_update': [4, 10, 16],
+                     'memory_buffer_size': [100, 500, 1000, 10000],
                      'gamma': [0.9, 0.95, 0.999],
                      'ep_decay': [0.9, 0.95, 0.999],
                      'epsilon': [0.7, 0.9, 1.0],
