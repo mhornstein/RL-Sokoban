@@ -68,13 +68,13 @@ def plot_mean_steps(df, tested_parameter, ax):
     df = df[[tested_parameter, 'total_steps_avg']]
     sns.barplot(data=df, x=tested_parameter, y='total_steps_avg', palette=palette, ax=ax)
     ax.set(xlabel=ax.get_xlabel().replace('_', ' '))
-    ax.set(ylabel=ax.get_ylabel().replace('_', ' '))
+    ax.set(ylabel='')
 
-def plot_done_episodes_count(df, tested_parameter, total_episodes_count, ax):
+def plot_done_episodes_count(df, tested_parameter, ax):
     df = df[[tested_parameter, 'done_episodes_count']]
     sns.barplot(data=df, x=tested_parameter, y='done_episodes_count', palette=palette, ax=ax)
     ax.set(xlabel=ax.get_xlabel().replace('_', ' '))
-    ax.set(ylabel=f"avg {ax.get_ylabel().replace('_', ' ')}\n[in {total_episodes_count} episodes]")
+    ax.set(ylabel='')
 
 def plot_train_metric(train_log_path, metric, ax):
     # First - load train logs
@@ -102,25 +102,27 @@ def create_report(plot_path, tested_parameter, train_result_file, test_result_fi
     create_header(parameter_header_subplot, tested_parameter.replace('_', ' '))
 
     train_mean_header_subplot = fig.add_subplot(gs[2, :])
-    create_header(train_mean_header_subplot, 'Average steps and done episodes count out of all episodes in training')
+    create_header(train_mean_header_subplot, 'Train metrics')
 
     train_graph_header_subplot = fig.add_subplot(gs[5, :])
-    create_header(train_graph_header_subplot, 'train graphs')
+    create_header(train_graph_header_subplot, 'Train graphs')
 
     # add evaluation results
     df = pd.read_csv(test_result_file)
     policy_evaluation_subplot = fig.add_subplot(gs[1, :])
-    create_table(policy_evaluation_subplot, 'Policy Evaluation results', df)
+    create_table(policy_evaluation_subplot, 'Policy evaluation results', df)
 
-    # add train results
+    # add train metrics
     df = pd.read_csv(train_result_file)
+    total_episodes_count = df['total_episodes_count'].iloc[0]
 
     ax = fig.add_subplot(gs[3, 0:3])
-    plot_mean_steps(df, tested_parameter, ax)
+    plot_done_episodes_count(df, tested_parameter, ax)
+    ax.set_title(f'Total episodes done out of {total_episodes_count}')
 
-    ax = fig.add_subplot(gs[3, 4:])
-    total_episodes_count = df['total_episodes_count'].iloc[0]
-    plot_done_episodes_count(df, tested_parameter, total_episodes_count, ax)
+    ax = fig.add_subplot(gs[3, 3:])
+    plot_mean_steps(df, tested_parameter, ax)
+    ax.set_title(f'Avg episode steps per {total_episodes_count} episodes')
 
     # Add steps, reward and loss graphs
     plot_train_metric(train_log_path, 'loss', ax=fig.add_subplot(gs[6, 0:2]))
