@@ -24,7 +24,6 @@ def save_lineplot(data, path, title, xlabel, ylabel):
     plt.close()
 
 def log_training_process(log_dir, episodes_loss, episodes_steps, episodes_rewards):
-
     # First - save the lineplot
     plt.clf()
     save_lineplot(data=episodes_loss, path=f'{log_dir}/Convergence_Graph__Episodes_loss.png',
@@ -102,11 +101,11 @@ def create_report(plot_path, tested_parameter, train_result_file, test_result_fi
     parameter_header_subplot = fig.add_subplot(gs[0, :])
     create_header(parameter_header_subplot, tested_parameter.replace('_', ' '))
 
-    train_header_subplot = fig.add_subplot(gs[2, :])
-    create_header(train_header_subplot, 'train results')
+    train_mean_header_subplot = fig.add_subplot(gs[2, :])
+    create_header(train_mean_header_subplot, 'Average steps and done episodes count out of all episodes in training')
 
-    train_header_subplot = fig.add_subplot(gs[5, :])
-    create_header(train_header_subplot, 'train graphs')
+    train_graph_header_subplot = fig.add_subplot(gs[5, :])
+    create_header(train_graph_header_subplot, 'train graphs')
 
     # add evaluation results
     df = pd.read_csv(test_result_file)
