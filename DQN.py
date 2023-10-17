@@ -149,6 +149,8 @@ def dqn(env, num_episodes, batch_size, gamma, ep_decay, epsilon,
             epsilon = update_epsilon(epsilon, ep_decay)
             state = next_state
 
+        num_steps = steps_cutoff if not done else num_steps
+
         episodes_rewards.append(episode_reward)
         episodes_loss.append(episode_loss / num_steps)
         episodes_steps.append(num_steps)
