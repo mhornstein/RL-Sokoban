@@ -1,0 +1,4 @@
+ep_decay,done_episodes_count,total_episodes_count,total_steps_avg,rewards_avg
+0.9,0,100,500.0,-983.6499999999995
+0.95,17,100,420.78,-950.7109999999979
+0.999,83,100,106.37,-302.1639999999986

@@ -1,0 +1,4 @@
+epsilon,done_episodes_count,total_episodes_count,total_steps_avg,rewards_avg
+0.7,16,100,430.45,-998.7490000000001
+0.9,66,100,186.2,-463.93399999999923
+1.0,0,100,500.0,-1307.9499999999994

@@ -1,0 +1,4 @@
+gamma,done_episodes_count,total_episodes_count,total_steps_avg,rewards_avg
+0.9,30,100,363.76,-1052.1959999999956
+0.95,43,100,312.68,-974.6549999999947
+0.999,92,100,66.87,-158.2649999999998

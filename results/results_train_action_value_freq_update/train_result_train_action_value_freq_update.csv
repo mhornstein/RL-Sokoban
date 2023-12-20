@@ -1,0 +1,5 @@
+train_action_value_freq_update,done_episodes_count,total_episodes_count,total_steps_avg,rewards_avg
+1,0,100,500.0,-751.3900000000026
+4,0,100,500.0,-948.9600000000014
+8,13,100,458.08,-1536.784999999989
+16,2,100,493.61,-1325.1789999999953

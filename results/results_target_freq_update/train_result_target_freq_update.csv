@@ -1,0 +1,4 @@
+target_freq_update,done_episodes_count,total_episodes_count,total_steps_avg,rewards_avg
+4,89,100,83.64,-214.95499999999964
+10,72,100,163.42,-412.9799999999985
+16,51,100,269.48,-656.2969999999976

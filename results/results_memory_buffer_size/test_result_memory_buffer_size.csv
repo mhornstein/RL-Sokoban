@@ -1,0 +1,5 @@
+memory_buffer_size,solved,steps_count
+100,False,500
+500,False,500
+1000,False,500
+10000,True,9
