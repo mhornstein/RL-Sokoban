@@ -56,8 +56,8 @@ The target network is a frozen snapshot of the Q-network, and we maintain it thi
 To assess the performance of our DQN-based Sokoban solver, we use the following metrics:
 
 \begin{itemize}
-\item Episode Length: Average number of steps it takes to solve the Sokoban puzzle, with a maximum limit of 500 steps if the puzzle hasn't been solved by then.
-\item Success Rate: The percentage of puzzles successfully solved.
+\item Episode length during training: the average number of steps it takes to solve the Sokoban puzzle over 100 episodes is calculated, with a maximum limit of 500 steps if the puzzle hasn't been solved by then.
+\item Success Rate: Was the pu
 \item Network loss: measures how far off the predicted Q-values are from the actual values. 
 \end{itemize}
 
@@ -69,33 +69,74 @@ In order to facilitate the exploration of hyperparameters, we will maintain a co
 Given that the fixed scenario with one box offers the simplest option, we will use it to investigate the optimal parameters for the DQN algorithm.
 
 \subsubsection{Learning Rate}
-TODO
+TODO: update images caption!
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1\columnwidth]{../results/results_learning_rate/results_plot.png}
+  \caption{Performance Comparison of Various Learning Rate Values}
+  \label{fig:fig1}
+\end{figure}
 
 \subsubsection{Batch Size}
-TODO
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\columnwidth]{../results/results_batch_size/results_plot.png}
+  \caption{Performance Comparison of Various Learning Rate Values}
+  \label{fig:fig1}
+\end{figure}
 
 \subsubsection{Frequency of Network Training}
-TODO
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\columnwidth]{../results/results_train_action_value_freq_update/results_plot.png}
+  \caption{Performance Comparison of Various Learning Rate Values}
+  \label{fig:fig1}
+\end{figure}
 
 \subsubsection{Frequency of Target Network Updates}
-TODO
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\columnwidth]{../results/results_target_freq_update/results_plot.png}
+  \caption{Performance Comparison of Various Learning Rate Values}
+  \label{fig:fig1}
+\end{figure}
 
 \subsubsection{Size of the Experience Replay Buffer}
-TODO
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\columnwidth]{../results/results_memory_buffer_size/results_plot.png}
+  \caption{Performance Comparison of Various Learning Rate Values}
+  \label{fig:fig1}
+\end{figure}
 
 \subsubsection{Discount Factor (Gamma)}
-TODO
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\columnwidth]{../results/results_gamma/results_plot.png}
+  \caption{Performance Comparison of Various Learning Rate Values}
+  \label{fig:fig1}
+\end{figure}
 
-\subsubsection{Epsilon and Epsilon Decay}
+\subsubsection{Epsilon}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\columnwidth]{../results/results_gamma/results_plot.png}
+  \caption{Performance Comparison of Various Learning Rate Values}
+  \label{fig:fig1}
+\end{figure}
+
+\subsubsection{Epsilon Decay}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\columnwidth]{../results/results_epsilon/results_plot.png}
+  \caption{Performance Comparison of Various Learning Rate Values}
+  \label{fig:fig1}
+\end{figure}
 
 \subsection{Exploring The Alternative Scenarios}
 TODO
 
-\subsubsection{Random scenario - One Box}
-TODO
-
-\subsubsection{Random scenario - Two Boxes}
-TODO
 
 \section{Discussion}
 The purpose of this project was to apply the Deep Q Learning algorithm to solve the Sokoban game. During implementation, we encountered two key challenges. First, creating a suitable reward function proved to be challenging, and we had to experiment with various options. Second, selecting the correct hyperparameters, including the discount factor, learning rate, and exploration rate, played a vital role in the algorithm's performance. Our extensive experimentation led to the identification of hyperparameter values for successfully solving Sokoban. In conclusion, our experiments validate the effectiveness of the Deep Q Learning algorithm in overcoming the challenges posed by Sokoban.
