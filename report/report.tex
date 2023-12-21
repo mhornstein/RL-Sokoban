@@ -62,13 +62,14 @@ We methodically adjusted each hyperparameter as a time, maintaining all others a
 \begin{tabular}{|c|c|}
 \hline
 \textbf{Hyperparameter} & \textbf{Value} \\ \hline
-Hyperparameter 1        & Value 1        \\ \hline
-Hyperparameter 2        & Value 2        \\ \hline
-Hyperparameter 3        & Value 3        \\ \hline
-Hyperparameter 4        & Value N        \\ \hline
-Hyperparameter 5        & Value N        \\ \hline
-Hyperparameter 6        & Value N        \\ \hline
-Hyperparameter 7        & Value N        \\ \hline
+Learning Rate & 0.0001 \\ \hline
+Experience Replay Buffer Size & 10000 \\ \hline
+Batch Size (sampled from the experience replay buffer) & 256 \\ \hline
+Target Network Update Frequency (in episodes) & 4 \\ \hline
+Discount Facror (Gamma) & 0.999 \\ \hline
+Epsilon & 0.9 \\ \hline
+Epsilon decay & 0.999 \\ \hline
+
 \end{tabular}
 \caption{Summary of Constant Hyperparameter Values}
 \label{table:constant_hyperparameters}
@@ -103,6 +104,8 @@ This structured approach allowed for a clear and systematic evaluation of the im
 Next, we will present the above metrics for each tested hyperparameter value, discuss the results, and highlight the value that was finally selected.
 
 \subsubsection{Learning Rate}
+The learning rate controls how quickly a model updates its knowledge, with a high rate causing fast but potentially unstable learning, and a low rate leading to steadier but slower convergence.
+
 \begin{figure}[H]
   \centering
   \includegraphics[width=1\columnwidth]{../results/results_learning_rate/results_plot.png}
@@ -110,23 +113,8 @@ Next, we will present the above metrics for each tested hyperparameter value, di
   \label{fig:fig1}
 \end{figure}
 
-\subsubsection{Batch Size}
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.8\columnwidth]{../results/results_batch_size/results_plot.png}
-  \caption{Performance Comparison of Various Learning Rate Values}
-  \label{fig:fig1}
-\end{figure}
-
-\subsubsection{Frequency of Network Training}
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.8\columnwidth]{../results/results_train_action_value_freq_update/results_plot.png}
-  \caption{Performance Comparison of Various Learning Rate Values}
-  \label{fig:fig1}
-\end{figure}
-
-\subsubsection{Size of the Experience Replay Buffer}
+\subsubsection{Experience Replay Buffer Size}
+Experience replay is the practice of storing an agent's interactions, which include the state, action, reward, and next state, in a dedicated buffer. During the training process, mini-batches of experiences are randomly chosen from this buffer. This reduces the correlation between consecutive experiences during training.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.8\columnwidth]{../results/results_memory_buffer_size/results_plot.png}
@@ -134,7 +122,25 @@ Next, we will present the above metrics for each tested hyperparameter value, di
   \label{fig:fig1}
 \end{figure}
 
+\subsubsection{Batch Size (sampled from the experience replay buffer) }
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\columnwidth]{../results/results_batch_size/results_plot.png}
+  \caption{Performance Comparison of Various Learning Rate Values}
+  \label{fig:fig1}
+\end{figure}
+
+\subsubsection{Target Network Update Frequency (in episodes)}
+The target network is a frozen snapshot of the Q-network, and we maintain it this way for a specific number of epochs each time. This prevents the issue of the target Q-values changing too much during training. This improves the stability and convergence of the algorithm.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\columnwidth]{../results/results_train_action_value_freq_update/results_plot.png}
+  \caption{Performance Comparison of Various Learning Rate Values}
+  \label{fig:fig1}
+\end{figure}
+
 \subsubsection{Discount Factor (Gamma)}
+The Discount Factor (Gamma) determines the importance of future rewards, with a higher value favoring long-term gains over immediate rewards.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.8\columnwidth]{../results/results_gamma/results_plot.png}
@@ -143,6 +149,7 @@ Next, we will present the above metrics for each tested hyperparameter value, di
 \end{figure}
 
 \subsubsection{Epsilon}
+The Epsilon balances exploration and exploitation, gradually decreasing to shift from random to more informed actions.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.8\columnwidth]{../results/results_epsilon/results_plot.png}
@@ -151,6 +158,7 @@ Next, we will present the above metrics for each tested hyperparameter value, di
 \end{figure}
 
 \subsubsection{Epsilon Decay}
+In DQN, a high epsilon decay value quickly reduces exploration, favoring exploitation sooner, while a low value maintains exploration longer for potentially better policy learning.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.8\columnwidth]{../results/results_ep_decay/results_plot.png}
