@@ -23,12 +23,12 @@ This project presents the use of Reinforcement Learning to solve the Sokoban gam
 
 \section{Solution}
 \subsection{General approach}
-The Sokoban puzzle presents a grid-based world comprising the agent, walls, boxes, and target locations. The objective is to relocate all boxes to their designated target spots while minimizing the number of actions the agent performs. The agent is capable of executing actions such as moving in any of the four directions (up, down, left, right). The challenge lies in making optimal choices while avoiding dead-ends and loops of futile actions.
+The Sokoban puzzle presents a grid-based world comprising the agent, walls, boxes, and target locations. The objective is to relocate all boxes to their designated target spots while minimizing the number of actions the agent performs. The challenge lies in making optimal choices while avoiding dead-ends and loops of futile actions.
 
-DQN represents a model-free reinforcement learning algorithm that operates on reward: this algorithm uses a neural network to approximate the Q-function, which estimates the anticipated cumulative future rewards associated with each possible action within a specific state (Q-values). By instructing the network to approximate these rewards, DQN can establish a policy that maximizes expected rewards over an extended period.
+DQN represents a model-free reinforcement learning algorithm that operates on reward: this algorithm uses a neural network to approximate the Q-function, which estimates the anticipated cumulative future rewards associated with each possible action within a specific state (Q-values). By instructing the network to approximate these rewards, DQN can establish a policy that maximizes the expected rewards.
 
-\subsection{Design}
-\subsubsection{Network Architecture}
+\subsection{Network Architecture}
+
 We employ a deep neural network as the function approximating the Q-values. The network  architecture is illustrated in \figref{fig1} and consists of the following components:
 
 \begin{itemize}
@@ -46,31 +46,63 @@ We employ a deep neural network as the function approximating the Q-values. The 
   \label{fig:fig1}
 \end{figure}
 
-\subsubsection{Experience Replay}
-Experience replay is the practice of storing an agent's interactions, which include the state, action, reward, and next state, in a dedicated buffer. During the training process, mini-batches of experiences are randomly chosen from this buffer. This reduces the correlation between consecutive experiences during training.
+\subsection{The Agent Reward}
+We found that the most crucial aspect for the algorithm's success lies in precisely defining the agent's rewards.
+By default, the agent loses 0.1 points for each step it takes, intended to prevent it from taking too long to solve the game. The agent earns 10 points for finishing the game, with an additional 1 point for each box placed on the target (it is penalized with -1 point if it removes the box again).
 
-\subsubsection{Target Network}
-The target network is a frozen snapshot of the Q-network, and we maintain it this way for a specific number of epochs each time. This prevents the issue of the target Q-values changing too much during training. This improves the stability and convergence of the algorithm.
+The main issue was that the agent often failed to finish the game, thereby missing the opportunity to "discover" the 10-points reward at the end. To address this, we modified the rewards: we subtract the Manhattan distance of the boxes from the predefined default reward at each step. This means the agent loses more points if the boxes are far from their targets. This adjustment encouraged the agent to strive harder to move the boxes closer to the targets, thereby increasing its chances of earning the 10 points for completing the game.
+
+This choice proved to be critical: only in this manner was it possible to guide the agent toward progressing in completing the game and to create and adapt its policy accordingly.
 
 \section{Experimental results}
-To assess the performance of our DQN-based Sokoban solver, we use the following metrics:
+We methodically adjusted each hyperparameter as a time, maintaining all others at a constant level, within the fixed scenario featuring a single-box environment. We ensured that the agent successfully completed its task in this initial configuration. Table~\ref{table:constant_hyperparameters} provides a summary of these constant values.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Hyperparameter} & \textbf{Value} \\ \hline
+Hyperparameter 1        & Value 1        \\ \hline
+Hyperparameter 2        & Value 2        \\ \hline
+Hyperparameter 3        & Value 3        \\ \hline
+Hyperparameter 4        & Value N        \\ \hline
+Hyperparameter 5        & Value N        \\ \hline
+Hyperparameter 6        & Value N        \\ \hline
+Hyperparameter 7        & Value N        \\ \hline
+\end{tabular}
+\caption{Summary of Constant Hyperparameter Values}
+\label{table:constant_hyperparameters}
+\end{table}
+
+For each hyperparameter tested values, we assessed 3 aspects as follows:
 
 \begin{itemize}
-\item Episode length during training: the average number of steps it takes to solve the Sokoban puzzle over 100 episodes is calculated, with a maximum limit of 500 steps if the puzzle hasn't been solved by then.
-\item Success Rate: Was the pu
-\item Network loss: measures how far off the predicted Q-values are from the actual values. 
+  \item \textbf{Policy Evaluation Results}: The effectiveness of the created policy was summarized in a table, indicating:
+  \begin{itemize}
+    \item Whether the agent achieved its goal under the policy.
+    \item The number of steps taken to achieve the goal, with a maximum of 500 steps if the goal was not met.
+  \end{itemize}
+
+  \item \textbf{Training Metrics}: The training phase was evaluated and displayed in a bar chart, detailing:
+  \begin{itemize}
+    \item The proportion of completed episodes out of 100.
+    \item The average step count per episode.
+  \end{itemize}
+
+  \item \textbf{Training Graphs}: For each of the 100 training episodes, a line graph was used to display:
+  \begin{itemize}
+    \item The reward obtained by the agent.
+    \item The number of steps taken.
+    \item The network loss.
+  \end{itemize}
+  We expected these graphs to show convergence, indicating increasing rewards and decreasing steps and loss.
 \end{itemize}
 
-We measured the metrics during both the training time (for the 500 training episodes) and the testing time (using 10 puzzle samples).
+This structured approach allowed for a clear and systematic evaluation of the impact of each hyperparameter on the performance of the DQN algorithm.
 
-\subsection{Exploring Hyperparameters}
-In order to facilitate the exploration of hyperparameters, we will maintain a consistent configuration and systematically vary a single hyperparameter at a time to scrutinize its impact.
-
-Given that the fixed scenario with one box offers the simplest option, we will use it to investigate the optimal parameters for the DQN algorithm.
+Next, we will present the above metrics for each tested hyperparameter value, discuss the results, and highlight the value that was finally selected.
 
 \subsubsection{Learning Rate}
-TODO: update images caption!
-
 \begin{figure}[H]
   \centering
   \includegraphics[width=1\columnwidth]{../results/results_learning_rate/results_plot.png}
@@ -94,14 +126,6 @@ TODO: update images caption!
   \label{fig:fig1}
 \end{figure}
 
-\subsubsection{Frequency of Target Network Updates}
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.8\columnwidth]{../results/results_target_freq_update/results_plot.png}
-  \caption{Performance Comparison of Various Learning Rate Values}
-  \label{fig:fig1}
-\end{figure}
-
 \subsubsection{Size of the Experience Replay Buffer}
 \begin{figure}[H]
   \centering
@@ -121,7 +145,7 @@ TODO: update images caption!
 \subsubsection{Epsilon}
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.8\columnwidth]{../results/results_gamma/results_plot.png}
+  \includegraphics[width=0.8\columnwidth]{../results/results_epsilon/results_plot.png}
   \caption{Performance Comparison of Various Learning Rate Values}
   \label{fig:fig1}
 \end{figure}
@@ -129,7 +153,7 @@ TODO: update images caption!
 \subsubsection{Epsilon Decay}
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.8\columnwidth]{../results/results_epsilon/results_plot.png}
+  \includegraphics[width=0.8\columnwidth]{../results/results_ep_decay/results_plot.png}
   \caption{Performance Comparison of Various Learning Rate Values}
   \label{fig:fig1}
 \end{figure}
