@@ -113,6 +113,8 @@ The learning rate controls how quickly a model updates its knowledge, with a hig
   \label{fig:fig1}
 \end{figure}
 
+It is easy to see that among the values that were tested, 0.0001 and 0.00005 are the only ones that lead to successful policy learning and therefore the only ones that are relevant to us. Of the two, 0.0001 is more successful because it leads to more episodes that end successfully during training and accordingly - in a lower number of steps.
+
 \subsubsection{Experience Replay Buffer Size}
 Experience replay is the practice of storing an agent's interactions, which include the state, action, reward, and next state, in a dedicated buffer. During the training process, mini-batches of experiences are randomly chosen from this buffer. This reduces the correlation between consecutive experiences during training.
 \begin{figure}[H]
@@ -121,6 +123,7 @@ Experience replay is the practice of storing an agent's interactions, which incl
   \caption{Performance Comparison of Various Learning Rate Values}
   \label{fig:fig1}
 \end{figure}
+It can be seen that in order to maximize the agent's success, it is necessary to record as much of the information it has accumulated in its trials as possible - both older and newer information. The best value, which results in the most successful episode completions and the fewest steps, is the largest one tested: 10,000.
 
 \subsubsection{Batch Size (sampled from the experience replay buffer) }
 \begin{figure}[H]
@@ -129,6 +132,8 @@ Experience replay is the practice of storing an agent's interactions, which incl
   \caption{Performance Comparison of Various Learning Rate Values}
   \label{fig:fig1}
 \end{figure}
+
+It can be seen that the batch size that leads to the best results is 16, 32, or 256, with a slight preference for 256.
 
 \subsubsection{Target Network Update Frequency (in episodes)}
 The target network is a frozen snapshot of the Q-network, and we maintain it this way for a specific number of epochs each time. This prevents the issue of the target Q-values changing too much during training. This improves the stability and convergence of the algorithm.
@@ -139,6 +144,8 @@ The target network is a frozen snapshot of the Q-network, and we maintain it thi
   \label{fig:fig1}
 \end{figure}
 
+In this case, all values led to poor results. The only value that shows a significant advantage over the others is 8.
+
 \subsubsection{Discount Factor (Gamma)}
 The Discount Factor (Gamma) determines the importance of future rewards, with a higher value favoring long-term gains over immediate rewards.
 \begin{figure}[H]
@@ -147,6 +154,7 @@ The Discount Factor (Gamma) determines the importance of future rewards, with a 
   \caption{Performance Comparison of Various Learning Rate Values}
   \label{fig:fig1}
 \end{figure}
+The results of the study show a clear preference for a high value of Gamma. This value reflects the agent's preference for future rewards over immediate rewards. This is logical, as the most important reward for the agent is the reward it receives at the end - for completing the task and ending the game.
 
 \subsubsection{Epsilon}
 The Epsilon balances exploration and exploitation, gradually decreasing to shift from random to more informed actions.
@@ -156,9 +164,10 @@ The Epsilon balances exploration and exploitation, gradually decreasing to shift
   \caption{Performance Comparison of Various Learning Rate Values}
   \label{fig:fig1}
 \end{figure}
+The results show a clear preference for a value of Epsilon of 0.9.
 
 \subsubsection{Epsilon Decay}
-In DQN, a high epsilon decay value quickly reduces exploration, favoring exploitation sooner, while a low value maintains exploration longer for potentially better policy learning.
+In DQN, a low epsilon decay value quickly reduces exploration, favoring exploitation sooner, while a high value maintains exploration longer for potentially better policy learning.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.8\columnwidth]{../results/results_ep_decay/results_plot.png}
@@ -166,8 +175,10 @@ In DQN, a high epsilon decay value quickly reduces exploration, favoring exploit
   \label{fig:fig1}
 \end{figure}
 
+In the findings, it is evident that a high epsilon decay value is favored. This preference is logical, as the agent requires extensive exploration to achieve the final and target state. Therefore, it is beneficial to enable maximal exploration.
+
 \subsection{Exploring The Alternative Scenarios}
-TODO
+Using the best hyperparameter values as described above has proven effective in enabling the agent to find a policy that solves the game in the additional required configurations, such as those involving two boxes.
 
 
 \section{Discussion}
@@ -177,8 +188,6 @@ The purpose of this project was to apply the Deep Q Learning algorithm to solve 
 
 Please provide a link to your colab notebook.
 
-
-Good luck!!
 \bibliographystyle{plain}
 \bibliography{references}
 \end{document}
