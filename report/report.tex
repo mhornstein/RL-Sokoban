@@ -13,13 +13,20 @@
 \captionsetup[figure]{font={color=gray}}
 \usepackage{refstyle}
 \usepackage{float}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
 
 \begin{document}
 
 \maketitle
 
 \section{Introduction}
-This project presents the use of Reinforcement Learning to solve the Sokoban game, a complex puzzle involving the movement of boxes to target locations. We use Deep Q Learning (DQN) for this purpose. This report discusses game design within the context of DQN, analyzes the impact of various hyperparameters on the achieved solutions, and presents successful experiments results.
+This project presents the use of Reinforcement Learning to solve the Sokoban game, a complex puzzle involving the movement of boxes to target locations. We use Deep Q-Learning (DQN) for this purpose. This report discusses game design within the context of DQN, analyzes the impact of various hyperparameters on the achieved solutions, and presents successful experiments results.
 
 \section{Solution}
 \subsection{General approach}
@@ -36,7 +43,7 @@ We employ a deep neural network as the function approximating the Q-values. The 
 \item Input Layer: The input layer represents the current state of the Sokoban puzzle, which is encoded as an RGB picture of the game state.
 \item Convolution Layers: Employed for feature extraction.
 \item Hidden Layer: A single hidden layer with rectified linear unit (ReLU) activation function.
-\item Output Layer: The output layer corresponds to the Q-values for each possible action. It uses a linear activation function.
+\item Output Layer: The output layer corresponds to the Q-values for each of the 13 possible actions. It uses a linear activation function.
 \end{itemize}
 
 \begin{figure}[H]
@@ -48,14 +55,15 @@ We employ a deep neural network as the function approximating the Q-values. The 
 
 \subsection{The Agent Reward}
 We found that the most crucial aspect for the algorithm's success lies in precisely defining the agent's rewards.
+
 By default, the agent loses 0.1 points for each step it takes, intended to prevent it from taking too long to solve the game. The agent earns 10 points for finishing the game, with an additional 1 point for each box placed on the target (it is penalized with -1 point if it removes the box again).
 
-The main issue was that the agent often failed to finish the game, thereby missing the opportunity to "discover" the 10-points reward at the end. To address this, we modified the rewards: we subtract the Manhattan distance of the boxes from the predefined default reward at each step. This means the agent loses more points if the boxes are far from their targets. This adjustment encouraged the agent to strive harder to move the boxes closer to the targets, thereby increasing its chances of earning the 10 points for completing the game.
+The main issue was that the agent often failed to finish the game, thereby missing the opportunity to "discover" the 10-points reward at the end. To address this, we modified the reward: we subtract the Manhattan Distance between the boxes and the targets from the predefined default reward at each step. This means the agent loses more points if the boxes are far from their targets. This adjustment encouraged the agent to strive harder to move the boxes closer to the targets, thereby increasing its chances of earning the 10 points for completing the game.
 
 This choice proved to be critical: only in this manner was it possible to guide the agent toward progressing in completing the game and to create and adapt its policy accordingly.
 
 \section{Experimental results}
-We methodically adjusted each hyperparameter as a time, maintaining all others at a constant level, within the fixed scenario featuring a single-box environment. We ensured that the agent successfully completed its task in this initial configuration. Table~\ref{table:constant_hyperparameters} provides a summary of these constant values.
+To examine the impact of the different hyperparameters, we methodically adjusted each hyperparameter at a time, maintaining all others at a constant level, within a fixed scenario featuring a single-box environment. We ensured that the agent successfully completed its task in this initial configuration. Table~\ref{table:constant_hyperparameters} provides a summary of these constant values.
 
 \begin{table}[h]
 \centering
@@ -64,10 +72,10 @@ We methodically adjusted each hyperparameter as a time, maintaining all others a
 \textbf{Hyperparameter} & \textbf{Value} \\ \hline
 Learning Rate & 0.0001 \\ \hline
 Experience Replay Buffer Size & 10000 \\ \hline
-Batch Size (sampled from the experience replay buffer) & 256 \\ \hline
-Target Network Update Frequency (in episodes) & 4 \\ \hline
+Batch Size (sampled from the experience replay buffer) & 32 \\ \hline
+Target Network Update Frequency (in episodes) & 10 \\ \hline
 Discount Facror (Gamma) & 0.999 \\ \hline
-Epsilon & 0.9 \\ \hline
+Epsilon & 1 \\ \hline
 Epsilon decay & 0.999 \\ \hline
 
 \end{tabular}
@@ -101,7 +109,7 @@ For each hyperparameter tested values, we assessed 3 aspects as follows:
 
 This structured approach allowed for a clear and systematic evaluation of the impact of each hyperparameter on the performance of the DQN algorithm.
 
-Next, we will present the above metrics for each tested hyperparameter value, discuss the results, and highlight the value that was finally selected.
+Next, we will present the above metrics for each tested hyperparameter value and discuss the results.
 
 \subsubsection{Learning Rate}
 The learning rate controls how quickly a model updates its knowledge, with a high rate causing fast but potentially unstable learning, and a low rate leading to steadier but slower convergence.
@@ -110,18 +118,18 @@ The learning rate controls how quickly a model updates its knowledge, with a hig
   \centering
   \includegraphics[width=1\columnwidth]{../results/results_learning_rate/results_plot.png}
   \caption{Performance Comparison of Various Learning Rate Values}
-  \label{fig:fig1}
+  \label{fig:fig2}
 \end{figure}
 
 It is easy to see that among the values that were tested, 0.0001 and 0.00005 are the only ones that lead to successful policy learning and therefore the only ones that are relevant to us. Of the two, 0.0001 is more successful because it leads to more episodes that end successfully during training and accordingly - in a lower number of steps.
 
 \subsubsection{Experience Replay Buffer Size}
-Experience replay is the practice of storing an agent's interactions, which include the state, action, reward, and next state, in a dedicated buffer. During the training process, mini-batches of experiences are randomly chosen from this buffer. This reduces the correlation between consecutive experiences during training.
+Experience replay means storing the agent's interactions, which include the state, action, reward, and next state, in a dedicated buffer. During the training process, mini-batches of experiences are randomly chosen from this buffer. This reduces the correlation between consecutive experiences during training.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.8\columnwidth]{../results/results_memory_buffer_size/results_plot.png}
   \caption{Performance Comparison of Various Learning Rate Values}
-  \label{fig:fig1}
+  \label{fig:fig3}
 \end{figure}
 It can be seen that in order to maximize the agent's success, it is necessary to record as much of the information it has accumulated in its trials as possible - both older and newer information. The best value, which results in the most successful episode completions and the fewest steps, is the largest one tested: 10,000.
 
@@ -130,7 +138,7 @@ It can be seen that in order to maximize the agent's success, it is necessary to
   \centering
   \includegraphics[width=0.8\columnwidth]{../results/results_batch_size/results_plot.png}
   \caption{Performance Comparison of Various Learning Rate Values}
-  \label{fig:fig1}
+  \label{fig:fig4}
 \end{figure}
 
 It can be seen that the batch size that leads to the best results is 16, 32, or 256, with a slight preference for 256.
@@ -141,10 +149,10 @@ The target network is a frozen snapshot of the Q-network, and we maintain it thi
   \centering
   \includegraphics[width=0.8\columnwidth]{../results/results_train_action_value_freq_update/results_plot.png}
   \caption{Performance Comparison of Various Learning Rate Values}
-  \label{fig:fig1}
+  \label{fig:fig5}
 \end{figure}
 
-In this case, all values led to poor results. The only value that shows a significant advantage over the others is 8.
+In this case, all values led to poor results. The only value that shows a significant advantage over the others is 8, which is the closest to the default value we used of 10.
 
 \subsubsection{Discount Factor (Gamma)}
 The Discount Factor (Gamma) determines the importance of future rewards, with a higher value favoring long-term gains over immediate rewards.
@@ -152,9 +160,9 @@ The Discount Factor (Gamma) determines the importance of future rewards, with a 
   \centering
   \includegraphics[width=0.8\columnwidth]{../results/results_gamma/results_plot.png}
   \caption{Performance Comparison of Various Learning Rate Values}
-  \label{fig:fig1}
+  \label{fig:fig6}
 \end{figure}
-The results of the study show a clear preference for a high value of Gamma. This value reflects the agent's preference for future rewards over immediate rewards. This is logical, as the most important reward for the agent is the reward it receives at the end - for completing the task and ending the game.
+The results show a clear preference for a high value of Gamma. This value reflects the agent's preference for future rewards over immediate rewards. This is logical, as the most important reward for the agent is the reward it receives for completing the task and ending the game.
 
 \subsubsection{Epsilon}
 The Epsilon balances exploration and exploitation, gradually decreasing to shift from random to more informed actions.
@@ -162,31 +170,30 @@ The Epsilon balances exploration and exploitation, gradually decreasing to shift
   \centering
   \includegraphics[width=0.8\columnwidth]{../results/results_epsilon/results_plot.png}
   \caption{Performance Comparison of Various Learning Rate Values}
-  \label{fig:fig1}
+  \label{fig:fig7}
 \end{figure}
-The results show a clear preference for a value of Epsilon of 0.9.
+The results suggest that using an Epsilon value of 0.9 works best. This means it's better to use some exploitation but not too much, instead of exploring as much as possible from the start.
 
 \subsubsection{Epsilon Decay}
-In DQN, a low epsilon decay value quickly reduces exploration, favoring exploitation sooner, while a high value maintains exploration longer for potentially better policy learning.
+A low Epsilon Decay value quickly reduces exploration, favoring exploitation sooner, while a high value maintains exploration longer for potentially better policy learning.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.8\columnwidth]{../results/results_ep_decay/results_plot.png}
   \caption{Performance Comparison of Various Learning Rate Values}
-  \label{fig:fig1}
+  \label{fig:fig8}
 \end{figure}
 
-In the findings, it is evident that a high epsilon decay value is favored. This preference is logical, as the agent requires extensive exploration to achieve the final and target state. Therefore, it is beneficial to enable maximal exploration.
+In the findings, it is evident that a high epsilon decay value is favored. This preference is logical, as the agent requires extensive exploration to achieve the final state.
 
 \subsection{Exploring The Alternative Scenarios}
 Using the best hyperparameter values as described above has proven effective in enabling the agent to find a policy that solves the game in the additional required configurations, such as those involving two boxes.
 
 
 \section{Discussion}
-The purpose of this project was to apply the Deep Q Learning algorithm to solve the Sokoban game. During implementation, we encountered two key challenges. First, creating a suitable reward function proved to be challenging, and we had to experiment with various options. Second, selecting the correct hyperparameters, including the discount factor, learning rate, and exploration rate, played a vital role in the algorithm's performance. Our extensive experimentation led to the identification of hyperparameter values for successfully solving Sokoban. In conclusion, our experiments validate the effectiveness of the Deep Q Learning algorithm in overcoming the challenges posed by Sokoban.
+The purpose of this project was to apply the Deep Q-Learning algorithm to solve the Sokoban game. During implementation, we encountered two key challenges. First, creating a suitable reward function proved to be challenging, and we had to experiment with various options. Second, selecting the correct hyperparameters, including the discount factor, learning rate, and exploration rate, that played a vital role in the algorithm's performance. Our extensive experimentation led to the identification of hyperparameter values for successfully solving Sokoban. In conclusion, our experiments validate the effectiveness of the Deep Q-Learning algorithm in overcoming the challenges posed by Sokoban.
 
 \section{Code}
-
-Please provide a link to your colab notebook.
+This \href{https://github.com/mhornstein/RL-2}{Git link} contains all the necessary code, along with instructions on running the experiments for each section, and the corresponding Colab notebook.
 
 \bibliographystyle{plain}
 \bibliography{references}
