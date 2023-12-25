@@ -1,8 +1,8 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 
-\title{Reinforcement Learning- Final Course Project}
-\author{Student name (ID. 123456789),Student name ID. 987654321)}
+\title{Reinforcement Learning - Final Course Project}
+\author{Maor Hornstein (ID. 300278520)}
 \date{Submitted as final project report for the RL course, BIU, 2024}
 
 \usepackage{natbib}
@@ -30,7 +30,7 @@ This project presents the use of Reinforcement Learning to solve the Sokoban gam
 
 \section{Solution}
 \subsection{General approach}
-The Sokoban puzzle presents a grid-based world comprising the agent, walls, boxes, and target locations. The objective is to relocate all boxes to their designated target spots while minimizing the number of actions the agent performs. The challenge lies in making optimal choices while avoiding dead-ends and loops of futile actions.
+The Sokoban puzzle presents a grid-based world comprising an agent, walls, boxes, and target locations. The objective is to relocate all boxes to their designated target spots while minimizing the number of actions the agent performs. The challenge lies in making optimal choices while avoiding dead-ends and loops of futile actions.
 
 DQN represents a model-free reinforcement learning algorithm that operates on reward: this algorithm uses a neural network to approximate the Q-function, which estimates the anticipated cumulative future rewards associated with each possible action within a specific state (Q-values). By instructing the network to approximate these rewards, DQN can establish a policy that maximizes the expected rewards.
 
@@ -58,7 +58,7 @@ We found that the most crucial aspect for the algorithm's success lies in precis
 
 By default, the agent loses 0.1 points for each step it takes, intended to prevent it from taking too long to solve the game. The agent earns 10 points for finishing the game, with an additional 1 point for each box placed on the target (it is penalized with -1 point if it removes the box again).
 
-The main issue was that the agent often failed to finish the game, thereby missing the opportunity to "discover" the 10-points reward at the end. To address this, we modified the reward: we subtract the Manhattan Distance between the boxes and the targets from the predefined default reward at each step. This means the agent loses more points if the boxes are far from their targets. This adjustment encouraged the agent to strive harder to move the boxes closer to the targets, thereby increasing its chances of earning the 10 points for completing the game.
+The main issue was that the agent often failed to finish the game, thereby missing the opportunity to "discover" the 10-points reward at the end. To address this, we modified the reward: we subtract the Manhattan Distance between the boxes and the targets from the predefined default reward at each step. This means the agent loses more points if the boxes are far from their targets. This adjustment encouraged the agent to strive harder to move the boxes closer to the targets, thereby increasing its chances of earning the 10 points for completing the game. It also enabled the creation of a scaled reward system, as opposed to a binary one, where the agent would either succeed and receive a reward of 10 or fail and get no reward.
 
 This choice proved to be critical: only in this manner was it possible to guide the agent toward progressing in completing the game and to create and adapt its policy accordingly.
 
@@ -92,13 +92,13 @@ For each hyperparameter tested values, we assessed 3 aspects as follows:
     \item The number of steps taken to achieve the goal, with a maximum of 500 steps if the goal was not met.
   \end{itemize}
 
-  \item \textbf{Training Metrics}: The training phase was evaluated and displayed in a bar chart, detailing:
+  \item \textbf{Training Metrics}: The training phase \underline{evaluation} is displayed in a bar chart, detailing:
   \begin{itemize}
     \item The proportion of completed episodes out of 100.
     \item The average step count per episode.
   \end{itemize}
 
-  \item \textbf{Training Graphs}: For each of the 100 training episodes, a line graph was used to display:
+  \item \textbf{Training Graphs}: The training phase \underline{progress} is displayed in a line graph, detailing for each of the 100 training episodes:
   \begin{itemize}
     \item The reward obtained by the agent.
     \item The number of steps taken.
@@ -144,7 +144,7 @@ It can be seen that in order to maximize the agent's success, it is necessary to
 It can be seen that the batch size that leads to the best results is 16, 32, or 256, with a slight preference for 256.
 
 \subsubsection{Target Network Update Frequency (in episodes)}
-The target network is a frozen snapshot of the Q-network, and we maintain it this way for a specific number of epochs each time. This prevents the issue of the target Q-values changing too much during training. This improves the stability and convergence of the algorithm.
+The target network is a frozen snapshot of the Q-network, and we maintain it this way for a specific number of epochs each time. This prevents the issue of the target Q-values changing too much during training and improves the stability and convergence of the algorithm.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.8\columnwidth]{../results/results_train_action_value_freq_update/results_plot.png}
@@ -172,7 +172,7 @@ The Epsilon balances exploration and exploitation, gradually decreasing to shift
   \caption{Performance Comparison of Various Learning Rate Values}
   \label{fig:fig7}
 \end{figure}
-The results suggest that using an Epsilon value of 0.9 works best. This means it's better to use some exploitation but not too much, instead of exploring as much as possible from the start.
+The results suggest that using an Epsilon value of 0.9 works best. This means it's better to use some exploitation (but not too much) right from the start, instead of exploring as much as possible.
 
 \subsubsection{Epsilon Decay}
 A low Epsilon Decay value quickly reduces exploration, favoring exploitation sooner, while a high value maintains exploration longer for potentially better policy learning.
@@ -186,7 +186,7 @@ A low Epsilon Decay value quickly reduces exploration, favoring exploitation soo
 In the findings, it is evident that a high epsilon decay value is favored. This preference is logical, as the agent requires extensive exploration to achieve the final state.
 
 \subsection{Exploring The Alternative Scenarios}
-Using the best hyperparameter values as described above has proven effective in enabling the agent to find a policy that solves the game in the additional required configurations, such as those involving two boxes.
+Using the hyperparameter values as described in table~\ref{table:constant_hyperparameters} has proven effective in enabling the agent to find a policy that solves the game in the additional required configurations, such as those involving two boxes.
 
 
 \section{Discussion}
