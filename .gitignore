@@ -16,3 +16,5 @@ __pycache__/PyTorchDQN.cpython-310.pyc
 /report/report.log
 /report/report.pdf
 /report/report.synctex.gz
+/results_from_dok
+/results_learning_rate
